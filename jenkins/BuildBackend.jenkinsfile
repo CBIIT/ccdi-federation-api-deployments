@@ -72,7 +72,7 @@ pipeline {
 			[[url: "https://github.com/CBIIT/ccdi-federation-api-aggregation"]]])
 
   		checkout([$class: 'GitSCM',
-			branches: [[name: "${params.Environment}"]],
+			branches: [[name: "main"]],
 			extensions: [[$class: 'SubmoduleOption', 
 			recursiveSubmodules: true],
 			[$class: 'RelativeTargetDirectory',
