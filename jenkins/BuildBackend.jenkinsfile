@@ -52,9 +52,9 @@ pipeline {
 	  JOB_PATH     = "_default/_lower/FEDERATION/_jobs"
 	  REGION       = "us-east-1"
 	  TIER         = "${env.Environment}"
-	  DEPLOY_REPO  = "${env.PROJECT}-deployments"
+	  DEPLOY_REPO  = "ccdi-federation-api-deployments"
       CODE_BRANCH  = "${params.CodeBranch}"
-      CODE_FOLDER  = "${env.PROJECT}-${env.SERVICE}"
+      CODE_FOLDER  = "ccdi-federation-api-aggregation"
 
   }
 
@@ -69,7 +69,7 @@ pipeline {
 			[$class: 'RelativeTargetDirectory',
 			relativeTargetDir: "${env.CODE_FOLDER}"]],
 			userRemoteConfigs:
-			[[url: "git@github.com:CBIIT/ccdi-federation-api-aggregation.git"]]])
+			[[url: "https://github.com/CBIIT/ccdi-federation-api-aggregation"]]])
 
   		checkout([$class: 'GitSCM',
 			branches: [[name: "${params.Environment}"]],
