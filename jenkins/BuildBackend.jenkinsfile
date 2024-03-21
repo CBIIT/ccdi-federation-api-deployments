@@ -17,7 +17,7 @@ pipeline {
             value: 'dev,qa,stage,prod')
 
         gitParameter(branchFilter: 'origin/(.*)',
-            defaultValue: 'master',
+            defaultValue: 'main',
             name: 'CodeBranch',
             type: 'GitParameterDefinition',
             quickFilterEnabled: true,
@@ -69,16 +69,16 @@ pipeline {
 			[$class: 'RelativeTargetDirectory',
 			relativeTargetDir: "${env.CODE_FOLDER}"]],
 			userRemoteConfigs:
-			[[url: "https://github.com/CBIIT/${env.CODE_REPO}"]]])
+			[[url: "git@github.com:CBIIT/ccdi-federation-api-aggregation.git"]]])
 
   		checkout([$class: 'GitSCM',
 			branches: [[name: "${params.Environment}"]],
 			extensions: [[$class: 'SubmoduleOption', 
 			recursiveSubmodules: true],
 			[$class: 'RelativeTargetDirectory',
-			relativeTargetDir: "${env.PROJECT}-deployments"]],
+			relativeTargetDir: "ccdi-federation-api-deployments"]],
 			userRemoteConfigs:
-			[[url: "https://github.com/CBIIT/${env.DEPLOY_REPO}"]]])
+			[[url: "https://github.com/CBIIT/ccdi-federation-api-deployments"]]])
 
         }
 
