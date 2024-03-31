@@ -1,4 +1,4 @@
-bucket                  = "ins-state-nonprod"
+bucket                  = "ccdi-federation-state"
 key                     = "logging/terraform.tfstate"
 workspace_key_prefix    = "env"
 region                  = "us-east-1"
