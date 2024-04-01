@@ -11,7 +11,7 @@ locals {
     "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
   ]
 
-  application_url = terraform.workspace == "prod" ? "federation.ccdi.cancer.gov" : "federation-${terraform.workspace}.ccdi.cancer.gov"
+  application_url = terraform.workspace == "prod" ? "${var.project}.${var.program}.cancer.gov" : "${var.project}-${terraform.workspace}.${var.program}.cancer.gov"
 
   dynamic_secrets = {
     app = {

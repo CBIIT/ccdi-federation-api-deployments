@@ -54,6 +54,19 @@
 38. Removed public_subnet_ids as these are sourced from a data source.
 39. Removed create_db_instance as it is not used in the system stack.
 40. Removed create_opensearch_cluster as it is not used in the system stack.
+41. Removed domain_name as it's not required as a variable, and established as a local.
+42. Removed iam_prefix, as it's established as a local.
+43. Removed certificate_domain_name as it's not required for the data source importing the ACM resources.
+44. Removed s3_force_destroy as its not required for the system stack.
+45. Removed allow_cloudwatch_stream as it's not required for the system stack.
+46. Removed application_subdomain as it's not required for the system stack.
+47. Removed create_instance_profile as it's not required for the system stack - these are set with tier-specific conditionals.
+48. Removed account_level as this is determined by the workspace, and logically defined as a local.
+49. Removed allowed_ip_blocks as it's not required for the system stack.
+50. Removed bastion_host_security_group_id as it's not required for the system stack.
+51. Removed katalon_security_group_id as it's not required for the system stack.
+
+
 
 ## ECS Review:
 1. Updated module to use v1.16 (latest as of 4/1/24)
