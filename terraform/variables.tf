@@ -2,6 +2,7 @@
 variable "project" {
   description = "name of the project"
   type        = string
+  default = "federation"
 }
 
 variable "tags" {
@@ -243,7 +244,7 @@ variable "newrelic_s3_bucket" {
 variable "program" {
   type        = string
   description = "the program name"
-  default     = "ccdi-federation-api"
+  default     = "ccdi"
 }
 
 # Opensearch
