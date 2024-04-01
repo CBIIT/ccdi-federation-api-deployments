@@ -1,10 +1,9 @@
 # To-Do:
-1. Get the health check path defined in the microservices variable.
-
+1. S3 bucket for kinesis delivery failure logs
 
 # REVIEW OUTCOMES
 
-# General Review:
+## General Review:
 1. Removed databases, cloudfront, and S3 snapshot bucket from the main.tf file as those are not used in the system stack.
 2. Deleted the s3.tf file as the current resources defined in that file are not required for this stack.
 3. Deleted outputs.tf file as it is not used for now.
@@ -13,6 +12,41 @@
 6. Began adding resource tags in accordance with CBIIT's policy. 
 7. Created a tfvars file for each tier to define the appropriate variables for each tier.
 8. Set tfvars values for all tiers in the workspace directory. 
+
+## Provider Review:
+1. Added us-east-1 as the region for the provider.
+
+## ECS Review:
+1. Updated module to use v1.16 (latest as of 4/1/24)
+2. Alphabetized the module arguments for readability. 
+3. Updated the ecs_subnet_ids to use the data source for appropriate subnets.
+4. Removed the add_opensearch_permission argument as the module defaults the value to false and opensearch is not needed for the system stack.
+5. Updated the VPC ID argument to use the data source for the appropriate VPC.
+6. Removed add_cloudwatch_stream because the variable is not used in the module, though the module has the variable set with a default. 
+7. Removed the target_account_cloudone argument as the module defaults the value to true. 
+
+## Secrets Review:
+1. Moved resources from module to resources specified in secrets-manager.tf file because module is outdated and doesn't fit project use cases. 
+2. Removed the deepmerge module as it is not used in the system stack.
+3. Sourcing secrets from a json-encoded local that combines secrets from variables that are populated by tfvars files.
+
+## ALB Reiview:
+1. Updated module to use v1.16 (latest as of 4/1/24)
+2. Alphabetized the module arguments for readability.
+3. Removed the alb_type argument as the module defaults to "application", which is what we want.
+4. Updated the ALB subnets to use the data sources, accounting for the fact that the dev tier does not have a set of public subnets.
+5. Updated the alb_internal argument to conditionally set the value based on tier.
+6. Updated the VPC ID argument to use the data source for the appropriate VPC.
+7. Updated the alb_certificate_arn argument to use the ACM data source for the appropriate certificate.
+
+## S3 Review:
+1. Removed aws_s3_bucket_policy.s3_snapshot_policy as it's not being used by the stack. 
+
+## Security Group Review:
+1. Removed aws_security_group_rule.mysql_inbound as it's not required for the stack.
+2. Removed aws_security_group_rule.opensearch_outbound as it's not required for the stack.
+3. Removed aws_security_group_rule.opensearch_inbound as it's not required for the stack.
+4. Updated ECS ingress rule to only allow traffic originating from the ALB security group.
 
 # Variables Review:
 1. set a default value for program and project variables. 
@@ -70,30 +104,6 @@
 53. Recreated variables for the required secrets manager secrets, and removed the unused ones.
 54. Removed service variable as it's not required for the system stack as of now (may be needed later).
 
-## ECS Review:
-1. Updated module to use v1.16 (latest as of 4/1/24)
-2. Alphabetized the module arguments for readability. 
-3. Updated the ecs_subnet_ids to use the data source for appropriate subnets.
-4. Removed the add_opensearch_permission argument as the module defaults the value to false and opensearch is not needed for the system stack.
-5. Updated the VPC ID argument to use the data source for the appropriate VPC.
-6. Removed add_cloudwatch_stream because the variable is not used in the module, though the module has the variable set with a default. 
-7. Removed the target_account_cloudone argument as the module defaults the value to true. 
-
-## Secrets Review:
-1. Moved resources from module to resources specified in secrets-manager.tf file because module is outdated and doesn't fit project use cases. 
-2. Removed the deepmerge module as it is not used in the system stack.
-3. Sourcing secrets from a json-encoded local that combines secrets from variables that are populated by tfvars files.
-
-
-## ALB Reiview:
-1. Updated module to use v1.16 (latest as of 4/1/24)
-2. Alphabetized the module arguments for readability.
-3. Removed the alb_type argument as the module defaults to "application", which is what we want.
-4. Updated the ALB subnets to use the data sources, accounting for the fact that the dev tier does not have a set of public subnets.
-5. Updated the alb_internal argument to conditionally set the value based on tier.
-6. Updated the VPC ID argument to use the data source for the appropriate VPC.
-7. Updated the alb_certificate_arn argument to use the ACM data source for the appropriate certificate.
-
 ## Data Source Review:
 1. created a vpc data source that depends on the terraform.workspace value, deleted the vpc_id variable, and modified resources previously using the vpc_id variable to use the vpc data source.
 2. Created data sources for subnets that depends on the terraform.workspace value. 
@@ -103,15 +113,6 @@
 6. Removed all opensearch snapshot role/policy/attachment resources as they are not used in the system stack.
 7. Removed unnecessary S3 bucket policy definition that appeared to be used for alb logging - that's handled by the module.
 8. Established ACM certificate data source to get the imported certificate ARN for the ALB.
-
-## S3 Review:
-1. Removed aws_s3_bucket_policy.s3_snapshot_policy as it's not being used by the stack. 
-
-## Security Group Review:
-1. Removed aws_security_group_rule.mysql_inbound as it's not required for the stack.
-2. Removed aws_security_group_rule.opensearch_outbound as it's not required for the stack.
-3. Removed aws_security_group_rule.opensearch_inbound as it's not required for the stack.
-4. Updated ECS ingress rule to only allow traffic originating from the ALB security group.
 
 ## Locals Review:
 1. Removed the http port local value as its redundant to treat this as a local. 
@@ -148,6 +149,3 @@
 ## Outputs Review:
 1. Removed the opensearch_endpoint output as it is not used in the system stack.
 2. Deleted the outputs.tf file as it is not used for now.
-
-## Provider Review:
-1. Added us-east-1 as the region for the provider.
