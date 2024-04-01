@@ -11,6 +11,7 @@
 2. Deleted the s3.tf file as the current resources defined in that file are not required for this stack.
 3. Deleted outputs.tf file as it is not used for now.
 4. Moved the workspace directory to directly beneath the terraform directory.
+5. Renamed sg.tf to security-groups.tf for clarity.
 
 # Variables Review:
 1. set a default value for program and project variables. 
