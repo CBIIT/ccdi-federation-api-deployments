@@ -18,13 +18,11 @@ resource "aws_security_group_rule" "alb_https_inbound" {
 
 
 resource "aws_security_group_rule" "inbound_fargate" {
-  for_each = toset(local.fargate_security_group_ports)
-
   security_group_id        = module.ecs.ecs_security_group_id
   type                     = "ingress"
-  from_port                = each.key
+  from_port                = 3000
   protocol                 = "tcp"
-  to_port                  = each.key
+  to_port                  = 3000
   source_security_group_id = module.alb.alb_securitygroup_id
 }
 

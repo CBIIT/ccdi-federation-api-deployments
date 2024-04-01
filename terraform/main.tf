@@ -9,8 +9,12 @@ module "alb" {
   program             = var.program
   resource_prefix     = "${var.program}-${terraform.workspace}-${var.project}"
   stack_name          = var.project
-  tags                = var.tags
   vpc_id              = data.aws_vpc.vpc.id
+
+  tags = {
+    EnvironmentTier  = upper(terraform.workspace)
+    ResourceFunction = "Load Balancing"
+  }
 }
 
 # ECS
@@ -25,8 +29,12 @@ module "ecs" {
   microservices          = var.microservices
   resource_prefix        = "${var.program}-${terraform.workspace}-${var.project}"
   stack_name             = var.project
-  tags                   = var.tags
   vpc_id                 = data.aws_vpc.vpc.id
+
+  tags = {
+    EnvironmentTier  = upper(terraform.workspace)
+    ResourceFunction = "API Service"
+  }
 }
 
 # Monitoring
@@ -34,7 +42,6 @@ module "monitoring" {
   source = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/monitoring?ref=v1.9"
 
   app                  = var.project
-  tags                 = var.tags
   sumologic_access_id  = var.sumologic_access_id
   sumologic_access_key = var.sumologic_access_key
   microservices        = var.microservices
@@ -43,12 +50,16 @@ module "monitoring" {
   newrelic_account_id  = var.newrelic_account_id
   newrelic_api_key     = var.newrelic_api_key
   resource_prefix      = "${var.program}-${terraform.workspace}-${var.project}"
+
+  tags = {
+    EnvironmentTier  = upper(terraform.workspace)
+    ResourceFunction = "Monitoring"
+  }
 }
 
-# Newrelic
 module "new_relic_metric_pipeline" {
-  count  = var.create_newrelic_pipeline ? 1 : 0
-  source = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/firehose-metrics?ref=v1.9"
+  count  = terraform.workspace == "dev" || terraform.workspace == "stage" ? 1 : 0
+  source = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/firehose-metrics?ref=v1.16"
 
   account_id               = data.aws_caller_identity.current.account_id
   app                      = var.project
@@ -58,24 +69,5 @@ module "new_relic_metric_pipeline" {
   permission_boundary_arn  = local.permissions_boundary
   program                  = var.program
   s3_bucket_arn            = var.newrelic_s3_bucket
-  resource_prefix          = "${var.program}-${var.project}-${var.account_level}"
+  resource_prefix          = "${var.program}-${local.level}-${var.project}"
 }
-
-
-
-# Secrets
-module "deepmerge" {
-  source = "Invicton-Labs/deepmerge/null"
-  maps = [
-    local.dynamic_secrets,
-    var.secret_values
-  ]
-}
-
-module "secrets" {
-  source        = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/secrets?ref=main"
-  app           = var.project
-  secret_values = module.deepmerge.merged
-  #secret_values = var.secret_values
-}
-

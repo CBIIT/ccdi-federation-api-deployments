@@ -29,34 +29,35 @@ variable "microservices" {
   }))
 }
 
-
-# Monitoring
-variable "sumologic_access_id" {
+variable "federation_apis" {
   type        = string
-  description = "Sumo Logic Access ID"
-}
-variable "sumologic_access_key" {
-  type        = string
-  description = "Sumo Logic Access Key"
-  sensitive   = true
+  description = "apis accessed by the ccdi federation api service"
 }
 
-variable "create_newrelic_pipeline" {
-  type        = bool
-  description = "whether to create the newrelic pipeline"
-  default     = false
+
+variable "new_relic_metrics_api_key" {
+  type      = string
+  sensitive = true
 }
 
-variable "newrelic_account_id" {
-  type        = string
-  description = "Newrelic Account ID"
-  sensitive   = true
+variable "sumo_logic_api_key" {
+  type      = string
+  sensitive = true
 }
 
-variable "newrelic_api_key" {
-  type        = string
-  description = "Newrelic API Key"
-  sensitive   = true
+variable "new_relic_sidecar_api_key" {
+  type      = string
+  sensitive = true
+}
+
+variable "new_relic_account_id" {
+  type      = string
+  sensitive = true
+}
+
+variable "central_ecr_account_id" {
+  type      = string
+  sensitive = true
 }
 
 variable "newrelic_s3_bucket" {
@@ -64,19 +65,6 @@ variable "newrelic_s3_bucket" {
   description = "the bucket to use for failed metrics"
 }
 
-# Secrets
-variable "secret_values" {
-  type = map(object({
-    secretKey   = string
-    secretValue = map(string)
-    description = string
-  }))
-}
-
-variable "central_ecr_account_id" {
-  type        = string
-  description = "central ecr account number"
-}
 
 variable "service" {
   type        = string

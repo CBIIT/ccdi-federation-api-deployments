@@ -12,6 +12,8 @@
 3. Deleted outputs.tf file as it is not used for now.
 4. Moved the workspace directory to directly beneath the terraform directory.
 5. Renamed sg.tf to security-groups.tf for clarity.
+6. Began adding resource tags in accordance with CBIIT's policy. 
+7. Created a tfvars file for each tier to define the appropriate variables for each tier.
 
 # Variables Review:
 1. set a default value for program and project variables. 
@@ -65,6 +67,8 @@
 49. Removed allowed_ip_blocks as it's not required for the system stack.
 50. Removed bastion_host_security_group_id as it's not required for the system stack.
 51. Removed katalon_security_group_id as it's not required for the system stack.
+52. Removed the create_newrelic_pipeline variable as it's not required for the system stack - this is now handled with terraform.workspace conditional.
+53. Recreated variables for the required secrets manager secrets, and removed the unused ones.
 
 
 
@@ -76,6 +80,12 @@
 5. Updated the VPC ID argument to use the data source for the appropriate VPC.
 6. Removed add_cloudwatch_stream because the variable is not used in the module, though the module has the variable set with a default. 
 7. Removed the target_account_cloudone argument as the module defaults the value to true. 
+
+## Secrets Review:
+1. Moved resources from module to resources specified in secrets-manager.tf file because module is outdated and doesn't fit project use cases. 
+2. Removed the deepmerge module as it is not used in the system stack.
+3. Sourcing secrets from a json-encoded local that combines secrets from variables that are populated by tfvars files.
+
 
 ## ALB Reiview:
 1. Updated module to use v1.16 (latest as of 4/1/24)
@@ -124,7 +134,9 @@
 16. Removed cert_types local value as its redundant to treat this as a local.
 17. Removed resource_prefix local value as this is handled by a variable already.
 18. Removed s3_snapshot_bucket_name local value as it is not used in the system stack.
-19. Updated the application_url local to reflect appropriate values for this project, based on tier
+19. Updated the application_url local to reflect appropriate values for this project, based on tier.
+20. Deleted dynamic secrets local value as it is not used in the system stack - replaced it with a new local value for the secrets manager secrets.
+21. Removed fargate_security_group_ports local value as it is not used in the system stack.
 
 # Instance Profile Review:
 1. Renamed the instance profiile role to be shorter so that AWS doesn't complain about the length of the role name.
