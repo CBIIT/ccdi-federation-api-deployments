@@ -29,7 +29,7 @@ resource "aws_iam_role_policy_attachment" "jenkins" {
 }
 
 resource "aws_iam_role_policy_attachment" "managed_ecr" {
-  for_each = var.create_instance_profile ? toset(local.managed_policy_arns) : toset([])
+  for_each = terraform.workspace == "dev" || terraform.workspace == "stage" ? toset(local.managed_policy_arns) : toset([])
 
   role       = aws_iam_role.jenkins[0].name
   policy_arn = each.key

@@ -12,11 +12,10 @@ locals {
     "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
   ]
 
-
+  
 
   # ECS
-  application_url = terraform.workspace == "prod" ? "${var.application_subdomain}.${var.domain_name}" : "${var.application_subdomain}-${terraform.workspace}.${var.domain_name}"
-
+  application_url = terraform.workspace == "prod" ? "federation.ccdi.cancer.gov" : "federation-${terraform.workspace}.ccdi.cancer.gov"
 
   # Secrets
   dynamic_secrets = {

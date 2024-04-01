@@ -52,11 +52,6 @@
 39. Removed create_db_instance as it is not used in the system stack.
 40. Removed create_opensearch_cluster as it is not used in the system stack.
 
-
-
-
-
-
 ## ECS Review:
 1. Updated module to use v1.16 (latest as of 4/1/24)
 2. Alphabetized the module arguments for readability. 
@@ -112,6 +107,7 @@
 16. Removed cert_types local value as its redundant to treat this as a local.
 17. Removed resource_prefix local value as this is handled by a variable already.
 18. Removed s3_snapshot_bucket_name local value as it is not used in the system stack.
+19. Updated the application_url local to reflect appropriate values for this project, based on tier
 
 # Instance Profile Review:
 1. Renamed the instance profiile role to be shorter so that AWS doesn't complain about the length of the role name.
