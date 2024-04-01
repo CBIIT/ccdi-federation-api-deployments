@@ -2,7 +2,7 @@
 module "alb" {
   source = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/loadbalancer?ref=v1.16"
 
-  alb_certificate_arn = data.aws_acm_certificate.amazon_issued.arn
+  alb_certificate_arn = data.aws_acm_certificate.domain.arn
   alb_internal        = terraform.workspace == "dev" ? false : true
   alb_subnet_ids      = terraform.workspace == "dev" ? data.aws_subnets.webapp.ids : data.aws_subnets.public.ids
   env                 = terraform.workspace

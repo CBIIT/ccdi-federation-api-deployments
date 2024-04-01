@@ -3,7 +3,7 @@
 2. Determine what the desired URL will be for the API - and check if an ACM certificate exists that will support the URL. 
 
 
-# Review Outcomes
+# REVIEW OUTCOMES
 
 
 # General Review:
@@ -68,6 +68,7 @@
 4. Updated the ALB subnets to use the data sources, accounting for the fact that the dev tier does not have a set of public subnets.
 5. Updated the alb_internal argument to conditionally set the value based on tier.
 6. Updated the VPC ID argument to use the data source for the appropriate VPC.
+7. Updated the alb_certificate_arn argument to use the ACM data source for the appropriate certificate.
 
 ## Data Source Review:
 1. created a vpc data source that depends on the terraform.workspace value, deleted the vpc_id variable, and modified resources previously using the vpc_id variable to use the vpc data source.
