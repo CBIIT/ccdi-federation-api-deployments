@@ -1,10 +1,8 @@
 # To-Do:
-1. Check to make sure the central_ecr_account_id given to the ECS module is properly sourced.
-2. Determine what the desired URL will be for the API - and check if an ACM certificate exists that will support the URL. 
+1. Get the health check path defined in the microservices variable.
 
 
 # REVIEW OUTCOMES
-
 
 # General Review:
 1. Removed databases, cloudfront, and S3 snapshot bucket from the main.tf file as those are not used in the system stack.
@@ -14,6 +12,7 @@
 5. Renamed sg.tf to security-groups.tf for clarity.
 6. Began adding resource tags in accordance with CBIIT's policy. 
 7. Created a tfvars file for each tier to define the appropriate variables for each tier.
+8. Set tfvars values for all tiers in the workspace directory. 
 
 # Variables Review:
 1. set a default value for program and project variables. 
@@ -69,8 +68,7 @@
 51. Removed katalon_security_group_id as it's not required for the system stack.
 52. Removed the create_newrelic_pipeline variable as it's not required for the system stack - this is now handled with terraform.workspace conditional.
 53. Recreated variables for the required secrets manager secrets, and removed the unused ones.
-
-
+54. Removed service variable as it's not required for the system stack as of now (may be needed later).
 
 ## ECS Review:
 1. Updated module to use v1.16 (latest as of 4/1/24)

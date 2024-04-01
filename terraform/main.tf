@@ -22,7 +22,7 @@ module "ecs" {
   source = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/ecs?ref=v1.16"
 
   alb_https_listener_arn = module.alb.alb_https_listener_arn
-  application_url        = local.application_url # need to check on this
+  application_url        = local.application_url 
   central_ecr_account_id = var.central_ecr_account_id
   ecs_subnet_ids         = data.aws_subnets.webapp.ids
   env                    = terraform.workspace
@@ -37,25 +37,25 @@ module "ecs" {
   }
 }
 
-# Monitoring
-module "monitoring" {
-  source = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/monitoring?ref=v1.9"
+# # Monitoring
+# module "monitoring" {
+#   source = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/monitoring?ref=v1.9"
 
-  app                  = var.project
-  sumologic_access_id  = var.sumologic_access_id
-  sumologic_access_key = var.sumologic_access_key
-  microservices        = var.microservices
-  service              = var.service
-  program              = var.program
-  newrelic_account_id  = var.newrelic_account_id
-  newrelic_api_key     = var.newrelic_api_key
-  resource_prefix      = "${var.program}-${terraform.workspace}-${var.project}"
+#   app                  = var.project
+#   sumologic_access_id  = var.sumologic_access_id
+#   sumologic_access_key = var.sumologic_access_key
+#   microservices        = var.microservices
+#   service              = var.service
+#   program              = var.program
+#   newrelic_account_id  = var.newrelic_account_id
+#   newrelic_api_key     = var.newrelic_api_key
+#   resource_prefix      = "${var.program}-${terraform.workspace}-${var.project}"
 
-  tags = {
-    EnvironmentTier  = upper(terraform.workspace)
-    ResourceFunction = "Monitoring"
-  }
-}
+#   tags = {
+#     EnvironmentTier  = upper(terraform.workspace)
+#     ResourceFunction = "Monitoring"
+#   }
+# }
 
 module "new_relic_metric_pipeline" {
   count  = terraform.workspace == "dev" || terraform.workspace == "stage" ? 1 : 0

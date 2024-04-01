@@ -34,13 +34,12 @@ variable "federation_apis" {
   description = "apis accessed by the ccdi federation api service"
 }
 
-
-variable "new_relic_metrics_api_key" {
+variable "new_relic_account_id" {
   type      = string
   sensitive = true
 }
 
-variable "sumo_logic_api_key" {
+variable "new_relic_metrics_api_key" {
   type      = string
   sensitive = true
 }
@@ -50,7 +49,7 @@ variable "new_relic_sidecar_api_key" {
   sensitive = true
 }
 
-variable "new_relic_account_id" {
+variable "sumo_logic_api_key" {
   type      = string
   sensitive = true
 }
@@ -63,10 +62,4 @@ variable "central_ecr_account_id" {
 variable "newrelic_s3_bucket" {
   type        = string
   description = "the bucket to use for failed metrics"
-}
-
-
-variable "service" {
-  type        = string
-  description = "Name of the service where the monitoring is configured. example ecs, database etc"
 }
