@@ -9,6 +9,8 @@
 # General Review:
 1. Removed databases, cloudfront, and S3 snapshot bucket from the main.tf file as those are not used in the system stack.
 2. Deleted the s3.tf file as the current resources defined in that file are not required for this stack.
+3. Deleted outputs.tf file as it is not used for now.
+4. Moved the workspace directory to directly beneath the terraform directory.
 
 # Variables Review:
 1. set a default value for program and project variables. 

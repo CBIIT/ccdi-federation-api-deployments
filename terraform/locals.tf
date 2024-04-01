@@ -1,9 +1,8 @@
 locals {
-  iam_prefix           = "power-user"
-  level                = terraform.workspace == "stage" || terraform.workspace == "prod" ? "prod" : "nonprod"
-  permissions_boundary = terraform.workspace == "dev" || terraform.workspace == "qa" ? "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/PermissionBoundary_PowerUser" : null
-  nih_cidrs            = ["129.43.0.0/16", "137.187.0.0/16", "10.128.0.0/9", "165.112.0.0/16", "156.40.0.0/16", "10.208.0.0/21", "128.231.0.0/16", "130.14.0.0/16", "157.98.0.0/16", "10.133.0.0/16"]
-
+  iam_prefix                   = "power-user"
+  level                        = terraform.workspace == "stage" || terraform.workspace == "prod" ? "prod" : "nonprod"
+  permissions_boundary         = terraform.workspace == "dev" || terraform.workspace == "qa" ? "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/PermissionBoundary_PowerUser" : null
+  nih_cidrs                    = ["129.43.0.0/16", "137.187.0.0/16", "10.128.0.0/9", "165.112.0.0/16", "156.40.0.0/16", "10.208.0.0/21", "128.231.0.0/16", "130.14.0.0/16", "157.98.0.0/16", "10.133.0.0/16"]
   fargate_security_group_ports = ["443", "3306", "7473", "7474", "7687"]
 
 
@@ -12,12 +11,8 @@ locals {
     "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
   ]
 
-  
-
-  # ECS
   application_url = terraform.workspace == "prod" ? "federation.ccdi.cancer.gov" : "federation-${terraform.workspace}.ccdi.cancer.gov"
 
-  # Secrets
   dynamic_secrets = {
     app = {
       secretKey   = ""
