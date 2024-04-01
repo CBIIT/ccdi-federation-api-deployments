@@ -72,20 +72,6 @@ data "aws_iam_policy_document" "jenkins" {
   count = terraform.workspace == "dev" || terraform.workspace == "stage" ? 1 : 0
 
   statement {
-    effect    = "Allow"
-    actions   = ["iam:GetRole"]
-    resources = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/*"]
-  }
-
-  statement {
-    effect  = "Allow"
-    actions = ["iam:PassRole"]
-    resources = [
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/power-user-*",
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/ccdc-*"
-    ]
-  }
-  statement {
     effect = "Allow"
     actions = [
       "secretsmanager:GetResourcePolicy",
@@ -97,6 +83,7 @@ data "aws_iam_policy_document" "jenkins" {
       "arn:aws:secretsmanager:*:${data.aws_caller_identity.current.account_id}:secret:*"
     ]
   }
+
   statement {
     effect = "Allow"
     actions = [
@@ -227,36 +214,6 @@ data "aws_iam_policy_document" "jenkins" {
   }
 
   statement {
-    effect    = "Allow"
-    actions   = ["secretsmanager:*"]
-    resources = ["*"]
-  }
-  statement {
-    effect = "Allow"
-    actions = [
-      "iam:PassRole",
-      "iam:GetRole",
-    ]
-    resources = [
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.project}-${terraform.workspace}-task*",
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/power-user-${var.project}-${terraform.workspace}-task*"
-    ]
-  }
-  statement {
-    effect = "Allow"
-    actions = [
-      "es:ESHttpDelete",
-      "es:ESHttpGet",
-      "es:ESHttpHead",
-      "es:ESHttpPatch",
-      "es:ESHttpPost",
-      "es:ESHttpPut"
-    ]
-    resources = [
-      "arn:aws:es:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:domain/*",
-    ]
-  }
-  statement {
     effect = "Allow"
     actions = [
       "ec2:DescribeInstances",
@@ -266,71 +223,4 @@ data "aws_iam_policy_document" "jenkins" {
     ]
     resources = ["*"]
   }
-  statement {
-    effect = "Allow"
-    actions = [
-      "rds:AddRoleToDBCluster",
-      "rds:AddRoleToDBInstance",
-      "rds:CopyDBClusterSnapshot",
-      "rds:CopyDBSnapshot",
-      "rds:CreateDBSnapshot",
-      "rds:DescribeDBClusters",
-      "rds:DescribeDBEngineVersions",
-      "rds:DescribeDBInstances",
-      "rds:DownloadCompleteDBLogFile",
-      "rds:ModifyDBInstance",
-      "rds:RebootDBInstance",
-      "rds:RestoreDBClusterFromSnapshot",
-      "rds:RestoreDBInstanceFromDBSnapshot",
-      "rds:RestoreDBInstanceFromS3",
-      "rds:StartDBCluster",
-      "rds:StartDBInstance",
-      "rds:StopDBCluster",
-      "rds:StopDBInstance"
-    ]
-    resources = ["arn:aws:rds:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:db:ccdc-*"]
-  }
 }
-
-# S3
-data "aws_iam_policy_document" "s3_alb_policy" {
-  statement {
-    sid    = "allowalbaccount"
-    effect = "Allow"
-    principals {
-      #identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
-      identifiers = ["arn:aws:iam::${lookup(var.aws_account_id, var.region, "us-east-1")}:root"]
-      type        = "AWS"
-    }
-    actions   = ["s3:PutObject"]
-    resources = ["arn:aws:s3:::*/*"]
-  }
-  statement {
-    sid    = "allowalblogdelivery"
-    effect = "Allow"
-    principals {
-      identifiers = ["delivery.logs.amazonaws.com"]
-      type        = "Service"
-    }
-    actions   = ["s3:PutObject"]
-    resources = ["arn:aws:s3:::*/*"]
-    condition {
-      test     = "StringEquals"
-      values   = ["bucket-owner-full-control"]
-      variable = "s3:x-amz-acl"
-    }
-  }
-  statement {
-    sid       = "awslogdeliveryacl"
-    effect    = "Allow"
-    actions   = ["s3:GetBucketAcl"]
-    resources = ["arn:aws:s3:::*"]
-    principals {
-      identifiers = ["delivery.logs.amazonaws.com"]
-      type        = "Service"
-    }
-  }
-}
-
-
-

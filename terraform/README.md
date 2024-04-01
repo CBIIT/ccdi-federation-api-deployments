@@ -81,6 +81,7 @@
 4. Removed aws_iam_role_policy_attachment.s3_opensearch_cross_account_access as it is not used in the system stack.
 5. Removed aws_iam_policy_document.s3_opensearch_cross_account_access_policy_document as it is not used in the system stack.
 6. Removed all opensearch snapshot role/policy/attachment resources as they are not used in the system stack.
+7. Removed unnecessary S3 bucket policy definition that appeared to be used for alb logging - that's handled by the module.
 
 ## S3 Review:
 1. Removed aws_s3_bucket_policy.s3_snapshot_policy as it's not being used by the stack. 
@@ -110,3 +111,19 @@
 16. Removed cert_types local value as its redundant to treat this as a local.
 17. Removed resource_prefix local value as this is handled by a variable already.
 18. Removed s3_snapshot_bucket_name local value as it is not used in the system stack.
+
+# Instance Profile Review:
+1. Renamed the instance profiile role to be shorter so that AWS doesn't complain about the length of the role name.
+2. Updated conditionals to only create the instance profile if the tier is  dev or stage.
+3. Removed the managed ECR policy from the instance profile since those permissions are already defined in the custom Jenkins policy we define.
+4. Removed the iam:PassRole and iam:GetRole permissions from Jenkins role since it is not required for this stack.
+6. Removed the opensearch permissions from the Jenkins policy as it is not required for this stack.
+7. Removed the RDS permissions from the Jenkins policy as it is not required for this stack.
+8. Removed the unrestricted secrets manager permissions from the Jenkins policy to improve security by design.
+
+## Outputs Review:
+1. Removed the opensearch_endpoint output as it is not used in the system stack.
+2. Deleted the outputs.tf file as it is not used for now.
+
+## Provider Review:
+1. Added us-east-1 as the region for the provider.
