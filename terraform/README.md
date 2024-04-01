@@ -82,6 +82,7 @@
 5. Removed aws_iam_policy_document.s3_opensearch_cross_account_access_policy_document as it is not used in the system stack.
 6. Removed all opensearch snapshot role/policy/attachment resources as they are not used in the system stack.
 7. Removed unnecessary S3 bucket policy definition that appeared to be used for alb logging - that's handled by the module.
+8. Established ACM certificate data source to get the imported certificate ARN for the ALB.
 
 ## S3 Review:
 1. Removed aws_s3_bucket_policy.s3_snapshot_policy as it's not being used by the stack. 

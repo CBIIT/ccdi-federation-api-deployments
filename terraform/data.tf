@@ -48,7 +48,7 @@ data "aws_subnets" "database" {
 
 data "aws_acm_certificate" "amazon_issued" {
   domain      = var.certificate_domain_name
-  types       = [local.cert_types]
+  types       = ["IMPORTED"]
   most_recent = true
 }
 
