@@ -9,6 +9,52 @@ data "aws_vpc" "vpc" {
   }
 }
 
+data "aws_subnets" "public" {
+  count = terraform.workspace == "dev" ? 0 : 1
+
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.vpc.id]
+  }
+
+  tags = {
+    Name = "sn-${terraform.workspace}-dm*-ext-us-east-*"
+  }
+}
+
+
+data "aws_subnets" "webapp" {
+
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.vpc.id]
+  }
+
+  tags = {
+    Name = "sn-${terraform.workspace}-webapp-us-east-*"
+  }
+}
+
+
+data "aws_subnets" "database" {
+
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.vpc.id]
+  }
+
+  tags = {
+    Name = "sn-${terraform.workspace}-db-us-east-*"
+  }
+}
+
+
+
+
+
+
+
+
 # ALB
 data "aws_acm_certificate" "amazon_issued" {
   domain      = var.certificate_domain_name
@@ -262,7 +308,7 @@ data "aws_iam_policy_document" "s3_alb_policy" {
     effect = "Allow"
     principals {
       #identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
-	  identifiers = ["arn:aws:iam::${lookup(var.aws_account_id,var.region,"us-east-1" )}:root"]
+      identifiers = ["arn:aws:iam::${lookup(var.aws_account_id, var.region, "us-east-1")}:root"]
       type        = "AWS"
     }
     actions   = ["s3:PutObject"]
@@ -297,36 +343,36 @@ data "aws_iam_policy_document" "s3_alb_policy" {
 
 # S3 snapshot bucket
 data "aws_iam_policy_document" "s3bucket_policy" {
-  count  = terraform.workspace == "stage" ? 1 : 0
+  count = terraform.workspace == "stage" ? 1 : 0
   statement {
-      effect = "Allow"
-      principals {
-        type        = "AWS"
-        identifiers = [
-            "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root",
-            "arn:aws:iam::${lookup(var.aws_nonprod_account_id,var.region,"us-east-1" )}:root",
-        ]
-      }
-      actions = [
-        "s3:ListBucket",
-        "s3:GetObject",
-        "s3:PutObject",
-        "s3:DeleteObject",
-        "s3:ListBucketVersions",
-        "s3:GetObjectVersion",
-        "s3:PutObjectAcl"
-      ]
-      resources = [
-        "arn:aws:s3:::${module.s3[0].bucket_name}",
-        "arn:aws:s3:::${module.s3[0].bucket_name}/*"
+    effect = "Allow"
+    principals {
+      type = "AWS"
+      identifiers = [
+        "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root",
+        "arn:aws:iam::${lookup(var.aws_nonprod_account_id, var.region, "us-east-1")}:root",
       ]
     }
+    actions = [
+      "s3:ListBucket",
+      "s3:GetObject",
+      "s3:PutObject",
+      "s3:DeleteObject",
+      "s3:ListBucketVersions",
+      "s3:GetObjectVersion",
+      "s3:PutObjectAcl"
+    ]
+    resources = [
+      "arn:aws:s3:::${module.s3[0].bucket_name}",
+      "arn:aws:s3:::${module.s3[0].bucket_name}/*"
+    ]
+  }
 }
 
 #Opensearch snapshot policy
 
 data "aws_iam_policy_document" "trust" {
-  count     = terraform.workspace == "dev" || terraform.workspace == "stage" ? 1 : 0
+  count = terraform.workspace == "dev" || terraform.workspace == "stage" ? 1 : 0
   statement {
     effect = "Allow"
 
@@ -355,11 +401,11 @@ resource "aws_iam_policy" "opensearch_snapshot_policy" {
 }
 
 data "aws_iam_policy_document" "opensearch_snapshot_policy_document" {
-  count     = terraform.workspace == "stage" ? 1 : 0
+  count = terraform.workspace == "stage" ? 1 : 0
   statement {
     effect    = "Allow"
     actions   = ["s3:ListBucket"]
-    resources = ["arn:aws:s3:::${var.s3_opensearch_snapshot_bucket}",]
+    resources = ["arn:aws:s3:::${var.s3_opensearch_snapshot_bucket}", ]
   }
 
   statement {
@@ -385,7 +431,7 @@ data "aws_iam_policy_document" "opensearch_snapshot_policy_document" {
   }
 
   statement {
-    effect = "Allow"
+    effect  = "Allow"
     actions = ["es:*"]
     resources = [
       "${module.opensearch[0].opensearch_arn}/*"
@@ -394,11 +440,11 @@ data "aws_iam_policy_document" "opensearch_snapshot_policy_document" {
 }
 
 data "aws_iam_policy_document" "opensearch_snapshot_policy_document" {
-  count     = terraform.workspace == "dev" ? 1 : 0
+  count = terraform.workspace == "dev" ? 1 : 0
   statement {
     effect    = "Allow"
     actions   = ["s3:ListBucket"]
-    resources = ["arn:aws:s3:::${var.s3_opensearch_snapshot_bucket}",]
+    resources = ["arn:aws:s3:::${var.s3_opensearch_snapshot_bucket}", ]
   }
 
   statement {
@@ -426,7 +472,7 @@ data "aws_iam_policy_document" "opensearch_snapshot_policy_document" {
   }
 
   statement {
-    effect = "Allow"
+    effect  = "Allow"
     actions = ["es:*"]
     resources = [
       "${module.opensearch[0].opensearch_arn}/*"
@@ -434,14 +480,14 @@ data "aws_iam_policy_document" "opensearch_snapshot_policy_document" {
   }
 
   statement {
-    effect = "Allow"
-    actions = ["sts:AssumeRole"]
-    resources = ["arn:aws:iam::${lookup(var.aws_prod_account_id,var.region,"us-east-1" )}:role/power-user-ccdi-stage-federation-api-s3-opensearch-cross-account-access"]
+    effect    = "Allow"
+    actions   = ["sts:AssumeRole"]
+    resources = ["arn:aws:iam::${lookup(var.aws_prod_account_id, var.region, "us-east-1")}:role/power-user-ccdi-stage-federation-api-s3-opensearch-cross-account-access"]
   }
 }
 
 resource "aws_iam_role_policy_attachment" "opensearch_snapshot_policy_attachment" {
-  count     = terraform.workspace == "dev" || terraform.workspace == "stage" ? 1 : 0
+  count      = terraform.workspace == "dev" || terraform.workspace == "stage" ? 1 : 0
   role       = aws_iam_role.opensearch_snapshot_role[0].name
   policy_arn = aws_iam_policy.opensearch_snapshot_policy[0].arn
 }
@@ -449,13 +495,13 @@ resource "aws_iam_role_policy_attachment" "opensearch_snapshot_policy_attachment
 #role for cross account access
 
 data "aws_iam_policy_document" "cross_account_trust" {
-  count     = terraform.workspace == "stage" ? 1 : 0
+  count = terraform.workspace == "stage" ? 1 : 0
   statement {
     effect = "Allow"
 
     principals {
-    	  identifiers = ["arn:aws:iam::${lookup(var.aws_nonprod_account_id,var.region,"us-east-1" )}:root"]
-          type        = "AWS"
+      identifiers = ["arn:aws:iam::${lookup(var.aws_nonprod_account_id, var.region, "us-east-1")}:root"]
+      type        = "AWS"
     }
     actions = ["sts:AssumeRole"]
   }
@@ -477,13 +523,13 @@ resource "aws_iam_policy" "s3_opensearch_cross_account_access_policy" {
 }
 
 data "aws_iam_policy_document" "s3_opensearch_cross_account_access_policy_document" {
-  count     = terraform.workspace == "stage" ? 1 : 0
+  count = terraform.workspace == "stage" ? 1 : 0
   statement {
     effect = "Allow"
     actions = [
-        "s3:PutObject",
-        "s3:GetObject",
-        "s3:ListBucket"
+      "s3:PutObject",
+      "s3:GetObject",
+      "s3:ListBucket"
     ]
     resources = [
       "arn:aws:s3:::${var.s3_opensearch_snapshot_bucket}",
@@ -493,7 +539,7 @@ data "aws_iam_policy_document" "s3_opensearch_cross_account_access_policy_docume
 }
 
 resource "aws_iam_role_policy_attachment" "s3_opensearch_cross_account_access" {
-  count                 = terraform.workspace == "stage" ? 1 : 0
-  role                  = aws_iam_role.s3_opensearch_cross_account_access_role[0].name
-  policy_arn            = aws_iam_policy.s3_opensearch_cross_account_access_policy[0].arn
+  count      = terraform.workspace == "stage" ? 1 : 0
+  role       = aws_iam_role.s3_opensearch_cross_account_access_role[0].name
+  policy_arn = aws_iam_policy.s3_opensearch_cross_account_access_policy[0].arn
 }
