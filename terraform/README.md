@@ -77,6 +77,10 @@
 ## Data Source Review:
 1. created a vpc data source that depends on the terraform.workspace value, deleted the vpc_id variable, and modified resources previously using the vpc_id variable to use the vpc data source.
 2. Created data sources for subnets that depends on the terraform.workspace value. 
+3. Removed opensearch from the instance profile trust policy used by EC2 (Jenkins)
+4. Removed aws_iam_role_policy_attachment.s3_opensearch_cross_account_access as it is not used in the system stack.
+5. Removed aws_iam_policy_document.s3_opensearch_cross_account_access_policy_document as it is not used in the system stack.
+6. Removed all opensearch snapshot role/policy/attachment resources as they are not used in the system stack.
 
 ## S3 Review:
 1. Removed aws_s3_bucket_policy.s3_snapshot_policy as it's not being used by the stack. 
