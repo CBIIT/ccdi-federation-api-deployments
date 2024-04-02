@@ -1,5 +1,5 @@
 # To-Do:
-1. S3 bucket for kinesis delivery failure logs
+1. Get SumoLogic keys for the tfvars.
 
 # REVIEW OUTCOMES
 
