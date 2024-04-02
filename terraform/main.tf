@@ -1,4 +1,3 @@
-# ALB
 module "alb" {
   source = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/loadbalancer?ref=v1.16"
 
@@ -17,7 +16,6 @@ module "alb" {
   }
 }
 
-# ECS
 module "ecs" {
   source = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/ecs?ref=v1.16"
 
