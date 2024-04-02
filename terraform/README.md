@@ -107,6 +107,8 @@
 52. Removed the create_newrelic_pipeline variable as it's not required for the system stack - this is now handled with terraform.workspace conditional.
 53. Recreated variables for the required secrets manager secrets, and removed the unused ones.
 54. Removed service variable as it's not required for the system stack as of now (may be needed later).
+55. Removed newrelic_s3_bucket variable as the s3 resources are created by the stack.
+56. Sorted alphabetically the variables in the variables.tf file.
 
 ## Data Source Review:
 1. created a vpc data source that depends on the terraform.workspace value, deleted the vpc_id variable, and modified resources previously using the vpc_id variable to use the vpc data source.

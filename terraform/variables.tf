@@ -1,18 +1,6 @@
-variable "program" {
+variable "federation_apis" {
   type        = string
-  description = "the program name"
-  default     = "ccdi"
-}
-
-variable "project" {
-  description = "name of the project"
-  type        = string
-  default     = "federation"
-}
-
-variable "tags" {
-  description = "tags to associate with this instance"
-  type        = map(string)
+  description = "apis accessed by the ccdi federation api service"
 }
 
 variable "microservices" {
@@ -29,32 +17,43 @@ variable "microservices" {
   }))
 }
 
-variable "federation_apis" {
-  type        = string
-  description = "apis accessed by the ccdi federation api service"
-}
-
 variable "new_relic_account_id" {
-  type      = string
-  sensitive = true
+  description = "the New Relic tenant account ID"
+  type        = string
+  sensitive   = true
 }
 
 variable "new_relic_api_key" {
-  type      = string
-  sensitive = true
+  description = "the New Relic API key"
+  type        = string
+  sensitive   = true
+}
+
+variable "program" {
+  description = "the program name"
+  type        = string
+  default     = "ccdi"
+}
+
+variable "project" {
+  description = "name of the project"
+  type        = string
+  default     = "federation"
+}
+
+variable "tags" {
+  description = "tags to associate with this instance"
+  type        = map(string)
 }
 
 variable "sumo_logic_api_key" {
-  type      = string
-  sensitive = true
+  description = "the Sumo Logic API key defined in the collector endpoint"
+  type        = string
+  sensitive   = true
 }
 
 variable "central_ecr_account_id" {
-  type      = string
-  sensitive = true
-}
-
-variable "newrelic_s3_bucket" {
+  description = "the central ECR AWS Account ID"
   type        = string
-  description = "the bucket to use for failed metrics"
+  sensitive   = true
 }
