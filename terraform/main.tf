@@ -35,20 +35,20 @@ module "ecs" {
   }
 }
 
-module "new_relic_metric_pipeline" {
-  count  = terraform.workspace == "dev" || terraform.workspace == "stage" ? 1 : 0
-  source = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/firehose-metrics?ref=v1.16"
+# module "new_relic_metric_pipeline" {
+#   count  = terraform.workspace == "dev" || terraform.workspace == "stage" ? 1 : 0
+#   source = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/firehose-metrics?ref=v1.16"
 
-  account_id               = data.aws_caller_identity.current.account_id
-  app                      = var.project
-  http_endpoint_access_key = var.new_relic_api_key
-  level                    = var.account_level
-  new_relic_account_id     = var.new_relic_account_id
-  permission_boundary_arn  = local.permissions_boundary
-  program                  = var.program
-  s3_bucket_arn            = aws_s3_bucket.kinesis[0].arn
-  resource_prefix          = "${var.program}-${local.account_level}-${var.project}"
-}
+#   account_id               = data.aws_caller_identity.current.account_id
+#   app                      = var.project
+#   http_endpoint_access_key = var.new_relic_api_key
+#   level                    = var.account_level
+#   new_relic_account_id     = var.new_relic_account_id
+#   permission_boundary_arn  = local.permissions_boundary
+#   program                  = var.program
+#   s3_bucket_arn            = aws_s3_bucket.kinesis[0].arn
+#   resource_prefix          = "${var.program}-${local.account_level}-${var.project}"
+# }
 
 # # Monitoring
 # module "monitoring" {
