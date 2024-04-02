@@ -1,6 +1,12 @@
 # Running the Terraform Execution Lifecycle
 This document provides an overview of the Terraform execution lifecycle and the commands used to manage Terraform resources.
 
+## Prerequisites
+Before running the Terraform commands, ensure that the following prerequisites are met:
+- Terraform is installed on the local machine.
+- The repository is cloned to the local environment.
+- The working directory is set to where ever the Terraform Provider file is located.
+
 ## Selecting or Creating Workspaces
 Workspaces are used to manage multiple configurations in a single directory.
 Selecting and/or creating a new workspace can be performed by running a single 
