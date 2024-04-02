@@ -22,7 +22,7 @@ module "ecs" {
   source = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/ecs?ref=v1.16"
 
   alb_https_listener_arn = module.alb.alb_https_listener_arn
-  application_url        = local.application_url 
+  application_url        = local.application_url
   central_ecr_account_id = var.central_ecr_account_id
   ecs_subnet_ids         = data.aws_subnets.webapp.ids
   env                    = terraform.workspace

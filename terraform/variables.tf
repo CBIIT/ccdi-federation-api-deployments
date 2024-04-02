@@ -39,12 +39,7 @@ variable "new_relic_account_id" {
   sensitive = true
 }
 
-variable "new_relic_metrics_api_key" {
-  type      = string
-  sensitive = true
-}
-
-variable "new_relic_sidecar_api_key" {
+variable "new_relic_api_key" {
   type      = string
   sensitive = true
 }
