@@ -1,7 +1,7 @@
 resource "aws_s3_bucket" "kinesis" {
   count = terraform.workspace == "dev" || terraform.workspace == "stage" ? 1 : 0
 
-  bucket = "${var.program}-${local.level}-${var.project}-kinesis-log-failures"
+  bucket = "${var.program}-${local.account_level}-${var.project}-kinesis-log-failures"
 }
 
 resource "aws_s3_bucket_public_access_block" "kinesis" {
