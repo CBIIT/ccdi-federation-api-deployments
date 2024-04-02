@@ -10,11 +10,11 @@ locals {
     "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
   ]
 
-  secrets = jsonencode({
+  secrets = {
     federation_apis              = var.federation_apis
     new_relic_api_key            = var.new_relic_api_key
     new_relic_metrics_account_id = var.new_relic_account_id
     sumo_logic_api_key           = var.sumo_logic_api_key
     central_ecr_account_id       = var.central_ecr_account_id
-  })
+  }
 }

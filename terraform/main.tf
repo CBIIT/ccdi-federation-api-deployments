@@ -68,6 +68,6 @@ module "new_relic_metric_pipeline" {
   new_relic_account_id     = var.newrelic_account_id
   permission_boundary_arn  = local.permissions_boundary
   program                  = var.program
-  s3_bucket_arn            = var.newrelic_s3_bucket
+  s3_bucket_arn            = aws_s3_bucket.kinesis.arn
   resource_prefix          = "${var.program}-${local.level}-${var.project}"
 }

@@ -5,5 +5,5 @@ resource "aws_secretsmanager_secret" "secret" {
 
 resource "aws_secretsmanager_secret_version" "secret" {
   secret_id     = aws_secretsmanager_secret.secret.id
-  secret_string = local.secrets
+  secret_string = jsonencode(local.secrets)
 }
