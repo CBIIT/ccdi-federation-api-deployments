@@ -3,7 +3,7 @@ module "alb" {
 
   alb_certificate_arn = data.aws_acm_certificate.domain.arn
   alb_internal        = terraform.workspace == "dev" ? false : true
-  alb_subnet_ids      = terraform.workspace == "dev" ? data.aws_subnets.webapp.ids : data.aws_subnets.public[count.index].ids
+  alb_subnet_ids      = terraform.workspace == "dev" ? data.aws_subnets.webapp.ids : data.aws_subnets.public[0].ids
   env                 = terraform.workspace
   program             = var.program
   resource_prefix     = "${var.program}-${terraform.workspace}-${var.project}"
