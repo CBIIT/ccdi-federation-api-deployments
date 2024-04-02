@@ -48,6 +48,10 @@
 3. Removed aws_security_group_rule.opensearch_inbound as it's not required for the stack.
 4. Updated ECS ingress rule to only allow traffic originating from the ALB security group.
 
+## Monitoring Review:
+1. Removed the monitoring module, or just commented it out, since we are unsure of how it is used. 
+2. Created an S3 bucket for the delivery of Kinesis failure logs, conditionally created based on the tier.
+
 # Variables Review:
 1. set a default value for program and project variables. 
 2. Removed the private_subnet_ids variable - need to ensure we are more specific and choosing the private webapp subnets, not the private subnets in general.
