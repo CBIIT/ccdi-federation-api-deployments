@@ -44,7 +44,7 @@ pipeline {
   environment {
 
       PROJECT      = "ccdi"
-	  SERVICE      = "backend"
+	  SERVICE      = "api"
 	  ECR_REPO     = "ccdi-federation-api"
 	  DEPLOY_JOB   = "DeployBackend"
 	  SLACK_SECRET = "federation_slack_url"
