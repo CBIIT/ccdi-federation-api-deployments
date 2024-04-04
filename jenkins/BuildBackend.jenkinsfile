@@ -45,7 +45,7 @@ pipeline {
 
       PROJECT      = "ccdi"
 	  SERVICE      = "backend"
-	  ECR_REPO     = "ccdi-federation-backend"
+	  ECR_REPO     = "ccdi-federation-repo"
 	  DEPLOY_JOB   = "DeployBackend"
 	  SLACK_SECRET = "federation_slack_url"
 	  CODE_REPO    = "ccdi-federation-backend"
