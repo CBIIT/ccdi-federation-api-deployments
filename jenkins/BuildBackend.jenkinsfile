@@ -211,7 +211,7 @@ pipeline {
                         image:  "${env.CODE_BRANCH}.${BUILD_NUMBER}",
                         service: "${env.SERVICE}",
                         deploymentFile: "ccdi-federation-api-deployments/deployments.yaml",
-                        deploymentRepoUrl: "https://github.com/CBIIT/${env.DEPLOY_REPO}",
+                        deploymentRepoUrl: "https://github.com/CBIIT/ccdi-federation-api-deployments",
                         deploymentCheckoutDirectory: "ccdi-federation-api-deployments"
                     )
                 }
