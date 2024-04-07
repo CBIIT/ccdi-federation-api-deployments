@@ -96,7 +96,7 @@ pipeline {
 
  			script {
 
-			    account_number = sh(label: 'Get ECR Account Number', returnStdout: true, script: "aws secretsmanager get-secret-value --region us-east-1 --secret-id ccd-dev-federation-secrets --query SecretString --output text | jq -r '.ecr_account'")
+			    account_number = sh(label: 'Get ECR Account Number', returnStdout: true, script: "aws secretsmanager get-secret-value --region us-east-1 --secret-id ccd-dev-federation-secrets --query SecretString --output text | jq -r '.central_ecr_account_id'")
 				env.ECR_ACCT = account_number.trim()
 				echo "$ECR_ACCT###"
 
