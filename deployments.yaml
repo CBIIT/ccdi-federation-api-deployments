@@ -1,0 +1,10 @@
+project: ccdi-federation
+services:
+  backend:
+    version: 2.2.0.141
+    image: 2.2.0.141
+    buildNumber: '141'
+  frontend:
+    version: 2.2.0.139
+    image: 2.2.0.139
+    buildNumber: '139'
