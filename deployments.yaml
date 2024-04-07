@@ -8,3 +8,7 @@ services:
     version: 2.2.0.139
     image: 2.2.0.139
     buildNumber: '139'
+  api:
+    version: main.44
+    image: main.44
+    buildNumber: '44'
