@@ -3,7 +3,7 @@
 pipeline {
 	agent {
 		node {
-			label 'ctdc-deploy-agent'
+			label 'federation-deploy-agent'
 		}
 	}
 
