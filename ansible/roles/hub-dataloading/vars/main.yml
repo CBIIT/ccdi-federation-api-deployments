@@ -1,0 +1,21 @@
+clickhouse_path: "/local/home/ccdi-docker/build/linux/amd64"
+backupfile: "{{ lookup('env','BACKUPFILE') }}"
+
+project_name:  "{{lookup('env','PROJECT_NAME')}}"
+tier: "{{ lookup('env','TIER') }}"
+
+snapshot_repo:  "{{lookup('env','SNAPSHOT_REPO')}}"
+snapshot_value: "{{lookup('env','SNAPSHOT_VALUE')}}"
+#opensearch_host: "{{ lookup('aws_secret', '{{ program }}-{{ tier }}-{{ project_name }}-credentials.opensearch_host', nested=true, region='us-east-1' ) }}" #"{{ lookup('amazon.aws.aws_secret', 'bento/{{project_name}}/{{tier}}.opensearch_host', nested=true, region='us-east-1' ) }}"
+opensearch_host: "https://vpc-ccdi-dev-hub-opensearch-bzgr6b4fqf4qdmgugczgdigcvm.us-east-1.es.amazonaws.com/"
+
+s3_bucket : "{{lookup('env','S3_Bucket')}}"
+
+base_path: "{{lookup('env', 'BASE_PATH')}}"
+workspace: "{{ lookup('env','WORKSPACE') }}"
+
+indices: "{{ lookup('env','INDICES') }}"
+
+snapshot_path: "{{ lookup('env','SNAPSHOT_PATH') }}"
+
+role_arn: "arn:aws:iam::966526488680:role/power-user-ccdi-nonprod-hub-opensearch-snapshot" 

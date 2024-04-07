@@ -1,0 +1,24 @@
+- name: Get the current caller identity information
+  aws_caller_info:
+  register: caller_info
+
+- name: set ECR registry name
+  set_fact:
+    ecr_repo: "986019062625.dkr.ecr.us-east-1.amazonaws.com"
+    #ecr_repo: "{{ caller_info.account }}.dkr.ecr.us-east-1.amazonaws.com"
+    account: "{{ caller_info.account }}"
+
+- name: print to stdout
+  command: echo "{{ ecr_repo }}"
+  register: ecrrepo
+
+- name: print to stdout
+  debug: msg="{{ ecrrepo.stdout }}"
+
+- name: login into ecr
+  shell: "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin {{ecr_repo}}"
+  ignore_errors: True
+  register: ecr_login
+
+- name: print to stdout
+  debug: msg="{{ ecr_login.stdout }}"

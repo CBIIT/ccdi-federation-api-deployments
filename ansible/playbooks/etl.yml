@@ -1,0 +1,17 @@
+---
+# - name: load data to neo4j db
+#   hosts: "{{project}}-{{tier}}-db"
+#   connection: local
+#   #become: yes
+#   gather_facts: yes
+- name: run data loading tasks  
+  hosts: localhost
+  connection: local
+  gather_facts: yes
+  tasks:
+    - name: perform data loading
+      include_role:
+        name: data-processing
+        tasks_from: data-loader
+      vars:
+        ansible_python_interpreter: /usr/bin/python3

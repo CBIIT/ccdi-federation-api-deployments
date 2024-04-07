@@ -1,0 +1,66 @@
+---
+# - name: install python3
+#   yum:
+#     name: python3
+#     state: installed
+
+# - name: install pip
+#   yum:
+#     name: 
+#       - epel-release
+#       - python3-pip
+#     state: present
+
+# - name: install required packages
+#   pip:
+#     name:
+#       - awscli
+#       - boto3
+#     state: present
+
+# - name: install required packages
+#   pip:
+#     name:
+#       - requests
+#       - requests_aws4auth
+#     state: present
+
+# - name: pip install requests 
+#   pip:
+#     name: urllib3
+#     executable: pip3
+#     state: latest
+
+- name: listing the contents of the workspace after extracting
+  shell: pwd
+  register: shell_result
+
+- debug:
+        var: shell_result.stdout_lines
+
+- name: listing the contents of the workspace after extracting
+  shell: ls
+  register: shell_result
+
+- debug:
+        var: shell_result.stdout_lines
+
+- name: copy opensearch restore script
+  copy:
+    src: opensearch-restore.py
+    dest: "{{workspace}}/opensearch-restore.py"
+    mode: 0755
+
+# - name: copy config files
+#   command: cp "roles/mtp-dataloading/templates/opensearch-restore.py.j2" "{{workspace}}/opensearch-restore.py"
+
+
+- name: load data
+  shell:
+    cmd: >
+      python3 {{workspace}}/opensearch-restore.py --oshost {{opensearch_host}} --repo {{snapshot_repo}} --snapshot {{snapshot_value}}  --s3bucket {{s3_bucket}} --indices {{indices}} --rolearn {{role_arn}} --basepath {{base_path}}
+  register: data_loader
+
+- name: show dataloader output
+  debug:
+    msg: "{{ data_loader }}"

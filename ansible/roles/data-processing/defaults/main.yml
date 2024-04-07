@@ -1,0 +1,17 @@
+# ---
+# program: "ccdi"
+# project: "{{ lookup('env','PROJECT') }}"
+
+# # vars file for data loading
+# neo4j_password: "{{ ( lookup('amazon.aws.aws_secret', '{{ program }}-{{ project }}-{{ tier }}-credentials', nested=true, region='us-east-1' ) | from_json).neo4j_password }}"
+# neo4j_user: "{{ ( lookup('amazon.aws.aws_secret', '{{ program }}-{{ project }}-{{ tier }}-credentials', region='us-east-1' ) | from_json ).neo4j_username }}"
+# tier: "{{ lookup('env','TIER') }}"
+# workspace: "{{ lookup('env','WORKSPACE') }}"
+# neo4j_ip: "{{ ( lookup('amazon.aws.aws_secret', '{{ program }}-{{ project }}-{{ tier }}-credentials', region='us-east-1' ) | from_json ).neo4j_ip }}"
+# wipe_db:  "{{ lookup('env','WIPE_DB') }}"
+# region: us-east-1
+
+# # vars for elasticsearch loader
+# es_host: "{{ lookup('amazon.aws.aws_secret', '{{ program }}-{{ project }}-{{ tier }}-credentials.opensearch_host', nested=true, region='us-east-1' ) }}"
+
+

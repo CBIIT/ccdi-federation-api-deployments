@@ -1,0 +1,26 @@
+---
+program: "ccdi"
+project_name: "hub"
+# vars file for data loading
+# neo4j_password: "{{ ( lookup('amazon.aws.aws_secret', '{{ program }}-{{ project }}-{{ tier }}-credentials', region='us-east-1' ) | from_json).neo4j_password }}"
+# neo4j_user: "{{ ( lookup('amazon.aws.aws_secret', '{{ program }}-{{ project }}-{{ tier }}-credentials', region='us-east-1' ) | from_json ).neo4j_username }}"
+tier: "{{ lookup('env','TIER') }}"
+workspace: "{{ lookup('env','WORKSPACE') }}"
+# neo4j_ip: "{{ ( lookup('amazon.aws.aws_secret', '{{ program }}-{{ project }}-{{ tier }}-credentials', region='us-east-1' ) | from_json ).neo4j_ip }}"
+#neo4j_ip: "{{ lookup('amazon.aws.aws_secret', '{{ program }}-{{ project }}-{{ tier }}-credentials.neo4j_ip', nested=true, region='us-east-1' )}}"
+wipe_db:  "{{ lookup('env','WIPE_DB') }}"
+region: us-east-1
+es_host: "https://{{ lookup('amazon.aws.aws_secret', 'bento/{{ project_name }}/{{ tier }}.es_host', nested=true, region='us-east-1' ) }}"
+about_file: data/staticPagesContent.yaml
+project: "{{ lookup('env','PROJECT') }}"
+
+# vars for elasticsearch loader
+# es_host: "{{ lookup('env','ES_HOST') }}"
+
+
+
+
+# # vars for elasticsearch loader
+# es_host: "{{ lookup('amazon.aws.aws_secret', '{{ program }}-{{ project }}-{{ tier }}-credentials.opensearch_host', nested=true, region='us-east-1' ) }}"
+
+

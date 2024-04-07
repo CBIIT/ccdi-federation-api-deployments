@@ -1,0 +1,23 @@
+
+date: "{{ansible_date_time.date}}"
+#db
+project_name: "{{project_name}}"
+account_type: "{{account_type}}"
+
+#build
+program: "ccdi"
+stack_name: "{{project_name}}"
+platform: aws
+tier: "{{ lookup('env','TIER') }}"
+workspace: "{{ lookup('env','WORKSPACE') }}"
+build_number: "{{ lookup('env','BUILD_NUMBER')}}" 
+region: us-east-1
+subdomain: "{{subdomain}}"
+domain_name: "{{domain_name}}"
+
+
+about_content_url: "https://raw.githubusercontent.com/CBIIT/bento-frontend/master/src/content/{{ tier }}/aboutPagesContent.yaml"
+newrelic_license_key: "{{ lookup('amazon.aws.aws_secret', 'monitoring/newrelic.api_key', nested=true, region='us-east-1' ) }}"
+        
+
+app_name: "{{ program }}-{{tier}}-{{project_name}}"

@@ -1,0 +1,8 @@
+---
+- name: install aws collection
+  command: /usr/local/bin/ansible-galaxy collection install {{item | quote}} --force-with-deps
+  ignore_errors: True
+  loop:
+    -  amazon.aws:<=3.2.0
+    -  community.aws:==5.4.0
+    -  community.docker:==2.7.1

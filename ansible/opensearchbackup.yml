@@ -1,0 +1,14 @@
+- name: OpenSearch backup for HUB
+  hosts: hub
+  connection: local
+  gather_facts: no
+  become: no
+  remote_user: ccdi-docker
+    
+  tasks:
+    - name: elasticsearch data backup
+      include_role:
+        name: hub-dataloading
+        tasks_from: opensearchbackup
+      vars:
+        ansible_python_interpreter: /bin/python3

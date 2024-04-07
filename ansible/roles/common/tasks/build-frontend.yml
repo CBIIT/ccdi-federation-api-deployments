@@ -1,0 +1,77 @@
+- name: create docker build directory
+  file:
+    path: "{{workspace}}/build"
+    state : directory
+
+
+- name: copy  nginx conf
+  copy:
+    remote_src: yes
+    # src: '{{ workspace }}/hub-deployments/docker/dockerfiles/nginx.conf'
+    src: '{{ workspace }}/docker/dockerfiles/nginx.conf'
+    dest: '{{workspace}}/build/nginx.conf'
+
+- name: copy entrypoint.sh to workspace
+  copy:
+    src: "nginx-entrypoint.sh"
+    dest: "{{workspace}}/build/nginx-entrypoint.sh"
+    mode: 0755
+
+- name: run npm install in {{ workspace }}/{{ project_name }}-frontend/
+  command: "{{ item }}"
+  args:
+    chdir: "{{ container_build_path }}"
+    warn: false
+  environment:
+    NODE_OPTIONS: --max-old-space-size=8192
+  loop:
+    - npm set progress=false
+    - npm install --silent
+    - npm run build --silent
+
+- name: move dist from frontend to temp build
+  copy:
+    src: "{{ container_build_path }}/dist"
+    dest: "{{workspace}}/build"
+    remote_src: yes
+    directory_mode: yes
+
+- name: copy env to dist
+  copy:
+    src: inject.template.js
+    dest: "{{workspace}}/build/dist/inject.template.js"
+    mode: 0755
+
+- name: build ccdi-{{ project_name }}-{{container_name}} image
+  community.docker.docker_image:
+    build:
+      args:
+        ECR_REPO: "{{ ecr_repo }}"
+      path: "{{workspace}}/build"
+      dockerfile: "{{workspace}}/docker/dockerfiles/frontend-microservice-dockerfile"
+      # dockerfile: "{{workspace}}/docker/dockerfiles/frontend-hub-dockerfile"
+      # dockerfile: "{{workspace}}/hub-frontend/Dockerfile"
+      pull: yes
+      nocache: yes
+    name: "ccdi-{{ project_name }}-{{ container_name }}"
+    tag: "{{ image_version }}.{{ build_number }}"
+    push: no
+    force_source: yes
+    source: build
+
+- name: Add ccdi-{{ project_name }}-{{ container_name }} image to ECR
+  community.docker.docker_image:
+    name: "ccdi-{{ project_name }}-{{ container_name }}"
+    repository: "{{ ecr_repo }}/ccdi-{{ project_name }}-{{ container_name }}" 
+    tag: "{{ image_version }}.{{ build_number }}"
+    force_tag: yes
+    push: yes
+    source: local
+
+- name: Add  latest tag to ccdi-{{ project_name }}-{{container_name}} image
+  community.docker.docker_image:
+    name: "{{ ecr_repo }}/ccdi-{{ project_name }}-{{ container_name }}:{{ image_version }}.{{build_number}}"
+    repository: "{{ ecr_repo }}/ccdi-{{ project_name }}-{{ container_name }}:latest"
+    force_tag: yes
+    push: yes
+    source: local

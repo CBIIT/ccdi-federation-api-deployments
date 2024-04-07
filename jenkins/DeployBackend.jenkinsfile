@@ -1,0 +1,137 @@
+@Library('datacommons-jenkins-shared-library@v1.1') _
+
+pipeline {
+	agent {
+		node {
+			label 'hub-deploy-agent'
+		}
+	}
+
+	parameters {
+
+        string(
+	        defaultValue: 'latest',
+		    description: 'The image tag to deploy',
+		    name: 'ImageTag')
+
+		extendedChoice(
+            name: 'Environment',
+            defaultValue: 'dev',
+            description: 'Choose the environment to build',
+            type: 'PT_SINGLE_SELECT',
+            value: 'dev,qa,stage,prod')
+
+  }
+
+  options {
+  	ansiColor('xterm')
+	timestamps()
+  }
+
+  environment {
+
+      PROGRAM      = "ccdi"
+	  PROJECT      = "federation"
+	  APP          = "api"
+	  SLACK_SECRET = "federation_slack_url"
+	  REGION       = "us-east-1"
+	  ECR_REPO     = "${env.PROGRAM}-${env.PROJECT}-${env.APP}"
+	  DEPLOY_REPO  = "ccdi-federation-api-deployments"
+	  IMAGE_TAG    = "${params.ImageTag}"
+	  ENV          = "${params.Environment}"
+	  CLUSTER      = "${env.PROGRAM}-${env.ENV}-${env.PROJECT}-ecs-cluster"
+	  SERVICE      = "${env.PROGRAM}-${env.ENV}-${env.PROJECT}-${env.APP}"
+
+  }
+
+  stages{
+  	stage('checkout'){
+  		steps {
+
+  		checkout([$class: 'GitSCM',
+			branches: [[name: '*/main']],
+			doGenerateSubmoduleConfigurations: false,
+			extensions: [[$class: 'RelativeTargetDirectory',
+			relativeTargetDir: "playbooks"]],
+			submoduleCfg: [],
+			userRemoteConfigs:
+			[[credentialsId: 'sowmya-jenkins-token', url: 'https://github.com/CBIIT/ccdi-federation-api-deployments']]])
+
+        checkout([$class: 'GitSCM',
+			branches: [[name: "${params.Environment}"]],
+			doGenerateSubmoduleConfigurations: false,
+			extensions: [[$class: 'RelativeTargetDirectory',
+			relativeTargetDir: "ccdi-federation-api-deployments"]],
+			submoduleCfg: [],
+			userRemoteConfigs:
+			[[credentialsId: 'sowmya-jenkins-token', url: 'https://github.com/CBIIT/ccdi-federation-api-deployments']]])
+
+        }
+
+  	}
+
+  	stage('Deploy'){
+  	    environment {
+            BE_VERSION = "${params.ImageTag}"
+        }
+        
+ 		steps {
+
+			wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
+                ansiblePlaybook(
+					playbook: "${WORKSPACE}/playbooks/ansible/playbooks/deploy-backend-microservice.yml", 
+            		inventory: "${WORKSPACE}/playbooks/ansible/playbooks/hosts",
+                    extraVars: [
+                        tier: "${params.Environment}",
+						project_name: "${PROJECT}",
+						iam_prefix: "power-user",
+						subdomain: "ccdi",
+						domain_name: "cancer.gov",
+						auth_enabled: true
+						],
+                    colorized: true)
+ 			}
+ 		}
+
+  	}
+		stage('verify deployment'){
+
+		steps {
+
+ 			script {
+
+			    sh label: 'Verify-Deploy', script: '''#!/bin/bash
+
+                # wait untiil the service is stable
+				aws ecs wait services-stable --cluster $CLUSTER --region $REGION --service $SERVICE
+
+				'''
+
+			}
+
+ 		}
+
+  	}
+
+}
+
+  post {
+
+    always {
+
+        notify(
+            secretPath: "notification/slack",
+            secretName: "federation_slack_url"
+        ) 
+
+    }
+
+    cleanup {
+
+        cleanWs()
+
+    }
+
+  }
+
+}
