@@ -71,21 +71,22 @@ pipeline {
  			script {
 
 			    // set sumo vars for logging
-				env.SUMO_COLLECTOR_ENDPOINT = sh(label: 'Get Sumo Endpoint', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.sumo_collector_endpoint'").trim()
-				env.SUMO_COLLECTOR_TOKEN = sh(label: 'Get Sumo Token', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.sumo_collector_token_$APP'").trim()
+				env.SUMO_COLLECTOR_ENDPOINT = sh(label: 'Get Sumo Endpoint', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.sumo_collector_endpoint'").trim()
+				env.SUMO_COLLECTOR_TOKEN = sh(label: 'Get Sumo Token', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.sumo_collector_token_$APP'").trim()
 
 				// set neo4j vars
-				env.NEO4J_HOST = sh(label: 'Get Neo4j Host', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.neo4j_ip'").trim()
+				// env.NEO4J_HOST = sh(label: 'Get Neo4j Host', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.neo4j_ip'").trim()
 
 				// set ECR account number
-				env.ECR_ACCOUNT = sh(label: 'Get ECR account', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.ecr_account'").trim()
+				env.ECR_ACCOUNT = sh(label: 'Get ECR account', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.ecr_account'").trim()
 
 				// set repo URL
 				env.REPO_URL = "${ECR_ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO}"
-
+                env.federation_apis = sh(label 'Get federation_apis', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.federation_apis'").trim() )
+                
 				// set template file name
 				//env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task.json"
-				env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task_cloudwatch.json"
+				// env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task_cloudwatch.json"
 
 			}
 
@@ -138,7 +139,7 @@ pipeline {
 				sed -i "s|{{project}}|$PROJECT|" $TEMPLATE_FILE
 				sed -i "s|{{sumo_collector_endpoint}}|$SUMO_COLLECTOR_ENDPOINT|" $TEMPLATE_FILE
 				sed -i "s|{{sumo_collector_token}}|$SUMO_COLLECTOR_TOKEN|" $TEMPLATE_FILE
-				sed -i "s|{{neo4j_host}}|$NEO4J_HOST|" $TEMPLATE_FILE
+		        sed -i "s||{{federation_apis}}|$SUMO_COLLECTOR_TOKEN|" $TEMPLATE_FILE 
 
 				aws ecs register-task-definition --cli-input-json file://$TEMPLATE_FILE
 
