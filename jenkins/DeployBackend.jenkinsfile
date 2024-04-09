@@ -88,7 +88,7 @@ pipeline {
 				// set template file name
 				// env.TEMPLATE_FILE="ccdi-federation-api-deployments/aws/${APP}_task.json"
 				// env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task_cloudwatch.json"
-				env.TEMPLATE_FILE="ccdi-federation-api-deployments/aws/${APP}_task.yml"
+				// env.TEMPLATE_FILE="ccdi-federation-api-deployments/aws/${APP}_task.yml"
 
 			}
 
@@ -133,28 +133,24 @@ pipeline {
 				export ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 				export IMAGE_ID="$REPO_URL:$IMAGE_TAG"
 
-				TASK_DEFINTION=$WORKSPACE/$TEMPLATE_FILE
+				TEMPLATE_PATH="ccdi-federation-api-deployments/aws"
 
 				# DEBUG
 				echo "$ACCOUNT_ID"
 				echo "$IMAGE_ID"
-				echo "$TASK_DEFINTION"
-				cat $TASK_DEFINTION
-				echo "$TEMPLATE_FILE"
-				cat $TEMPLATE_FILE
+				echo "$TEMPLATE_PATH"
+				cat $TEMPLATE_PATH/${APP}_task.yml
 				
 				# Update and register task definition
-				#envsubst < $TASK_DEFINTION > $TASK_DEFINTION
-				envsubst < $TEMPLATE_FILE > $TEMPLATE_FILE
+				envsubst < $TEMPLATE_PATH/${APP}_task.yml > $TEMPLATE_PATH/${APP}_task-deploy.yml
 
 				# DEBUG
-				echo "$TEMPLATE_FILE"
-				cat $TEMPLATE_FILE
+				echo "$TEMPLATE_PATH"
+				cat $TEMPLATE_PATH/${APP}_task-deploy.yml
 
 				#aws ecs register-task-definition --cli-input-yaml file://$TEMPLATE_FILE
 
-				#docker run --rm --name aws-cli amazon/aws-cli ecs register-task-definition --cli-input-yaml file://$TASK_DEFINTION
-				docker run --rm --name aws-cli amazon/aws-cli ecs register-task-definition --cli-input-yaml file://$TEMPLATE_FILE
+				docker run --rm --name -v $TEMPLATE_PATH:$TEMPLATE_PATH aws-cli amazon/aws-cli ecs register-task-definition --cli-input-yaml file://$TEMPLATE_PATH/${APP}_task-deploy.yml
 
 				'''
 
