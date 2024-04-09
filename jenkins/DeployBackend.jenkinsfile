@@ -146,7 +146,9 @@ pipeline {
 				cat $TASK_DEFINTION
 
 
-				aws ecs register-task-definition --cli-input-yaml file://$TEMPLATE_FILE
+				#aws ecs register-task-definition --cli-input-yaml file://$TEMPLATE_FILE
+
+				docker run --rm -it amazon/aws-cli ecs register-task-definition --cli-input-yaml file://$TEMPLATE_FILE
 
 				'''
 
