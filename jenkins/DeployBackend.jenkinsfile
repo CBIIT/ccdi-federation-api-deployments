@@ -80,7 +80,7 @@ pipeline {
 
 				// set ECR account number
 				env.ECR_ACCOUNT = sh(label: 'Get ECR account', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.ecr_account_id'").trim()
-                env.ACCOUNT_ID = sh(aws sts get-caller-identity --query "Account" --output text)
+                env.ACCOUNT_ID = sh(label: 'Get AWS account ID', returnStdout: true, script: "aws sts get-caller-identity --query "Account" --output text")
 				// set repo URL
 				env.REPO_URL = "${ECR_ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO}"
                 // env.federation_apis = sh(label 'Get federation_apis', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.federation_apis'").trim()
