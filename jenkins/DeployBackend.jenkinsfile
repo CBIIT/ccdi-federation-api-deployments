@@ -140,7 +140,7 @@ pipeline {
 				cat $TASK_DEFINTION
 				
 				# Update and register task definition
-				envsubst < $TASK_DEFINTION > $TASK_DEFINTION
+				#envsubst < $TASK_DEFINTION > $TASK_DEFINTION
 
 				echo "$TASK_DEFINTION"
 				cat $TASK_DEFINTION
