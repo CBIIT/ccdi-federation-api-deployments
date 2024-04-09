@@ -83,7 +83,7 @@ pipeline {
 
 				// set repo URL
 				env.REPO_URL = "${ECR_ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO}"
-                // env.federation_apis = sh(label 'Get federation_apis', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.federation_apis'").trim()
+                env.FEDERATION_APIS = sh(label 'Get federation_apis', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.federation_apis'").trim()
                 
 				// set template file name
 				// env.TEMPLATE_FILE="ccdi-federation-api-deployments/aws/${APP}_task.json"

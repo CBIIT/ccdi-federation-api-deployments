@@ -66,9 +66,8 @@ containerDefinitions:
     value: "-javaagent:/usr/local/tomcat/newrelic/newrelic.jar"
   - name: "tier"
     value: "$ENV"
-  secrets:
   - name: "federation_apis"
-    valueFrom: "arn:aws:secretsmanager:us-east-1:$ACCOUNT_ID:secret:ccdi-$ENV-federation-secrets:federation_apis::"
+    value: 
 
   logConfiguration:
     logDriver: awsfirelens
