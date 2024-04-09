@@ -137,6 +137,7 @@ pipeline {
 				# DEBUG
 				echo "$ACCOUNT_ID"
 				echo "$IMAGE_ID"
+				echo $SUMO_COLLECTOR_ENDPOINT
 				echo "$TEMPLATE_PATH"
 				cat $TEMPLATE_PATH/${APP}_task.yml
 				
