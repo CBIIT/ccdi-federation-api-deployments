@@ -79,7 +79,7 @@ pipeline {
 				// env.NEO4J_HOST = sh(label: 'Get Neo4j Host', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.neo4j_ip'").trim()
 
 				// set ECR account number
-				env.ECR_ACCOUNT = sh(label: 'Get ECR account', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.ecr_account'").trim()
+				env.ECR_ACCOUNT = sh(label: 'Get ECR account', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.ecr_account_id'").trim()
 
 				// set repo URL
 				env.REPO_URL = "${ECR_ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO}"
@@ -130,7 +130,7 @@ pipeline {
 
 				# create new revision for $PROJECT-$APP Task Definition
 				echo "Updating Task Defintion to Use: $ECR_REPO:$IMAGE_TAG"
-				export ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
+				export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 				export IMAGE_ID="$REPO_URL:$IMAGE_TAG"
 
 				TEMPLATE_PATH="ccdi-federation-api-deployments/aws"
