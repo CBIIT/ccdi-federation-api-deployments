@@ -50,7 +50,7 @@ containerDefinitions:
   environment:
   - name: "PROJECT"
     value: "$PROJECT"
-  - name: "BENTO_API_VERSION"
+  - name: "API_VERSION"
     value: "$IMAGE_TAG"
   - name: "NEW_RELIC_LOG_FILE_NAME"
     value: "STDOUT"
