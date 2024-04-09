@@ -150,7 +150,7 @@ pipeline {
 
 				#aws ecs register-task-definition --cli-input-yaml file://$TEMPLATE_FILE
 
-				docker run --rm --name -v $TEMPLATE_PATH:$TEMPLATE_PATH aws-cli amazon/aws-cli ecs register-task-definition --cli-input-yaml file://$TEMPLATE_PATH/${APP}_task-deploy.yml
+				docker run --rm --name -v /$TEMPLATE_PATH:/$TEMPLATE_PATH/ aws-cli amazon/aws-cli ecs register-task-definition --cli-input-yaml file:///$TEMPLATE_PATH/${APP}_task-deploy.yml
 
 				'''
 
