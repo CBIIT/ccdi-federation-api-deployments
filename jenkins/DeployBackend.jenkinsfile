@@ -52,7 +52,8 @@ pipeline {
   		steps {
 
   		checkout([$class: 'GitSCM',
-			branches: [[name: '*/main']],
+			//branches: [[name: '*/main']],
+			branches: [[name: '*/deploy_test']],
 			extensions: [[$class: 'SubmoduleOption', 
 			recursiveSubmodules: true],
 			[$class: 'RelativeTargetDirectory',
@@ -81,7 +82,7 @@ pipeline {
 				env.ECR_ACCOUNT = sh(label: 'Get ECR account', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.ecr_account'").trim()
 
 				// set repo URL
-				// env.REPO_URL = "${ECR_ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO}"
+				env.REPO_URL = "${ECR_ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO}"
                 // env.federation_apis = sh(label 'Get federation_apis', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.federation_apis'").trim()
                 
 				// set template file name
@@ -134,6 +135,9 @@ pipeline {
 
 				# Update and register task definition
 				envsubst < $TEMPLATE_FILE > $TEMPLATE_FILE
+
+				echo "$TEMPLATE_FILE"
+				cat $TEMPLATE_FILE
 				aws ecs register-task-definition --cli-input-yaml file://$TEMPLATE_FILE
 
 				'''
@@ -145,46 +149,46 @@ pipeline {
 
   	}
 
-    stage('Update Service'){
+    // stage('Update Service'){
 
- 		steps {
+ 	// 	steps {
 
- 			script {
+ 	// 		script {
 
-			    sh label: 'Service-Update', script: '''#!/bin/bash
+	// 		    sh label: 'Service-Update', script: '''#!/bin/bash
 
-				# Redeploy Service Using The Latest Task Definition
-				echo "Updating Service: $SERVICE"
+	// 			# Redeploy Service Using The Latest Task Definition
+	// 			echo "Updating Service: $SERVICE"
 
-				TASK_REVISION=$(aws ecs describe-task-definition --task-definition $SERVICE | egrep "revision" | awk '{print $2}' | sed 's/,//')
-				aws ecs update-service --cluster $CLUSTER --region $REGION --service $SERVICE --task-definition $SERVICE:$TASK_REVISION --desired-count 1
+	// 			TASK_REVISION=$(aws ecs describe-task-definition --task-definition $SERVICE | egrep "revision" | awk '{print $2}' | sed 's/,//')
+	// 			aws ecs update-service --cluster $CLUSTER --region $REGION --service $SERVICE --task-definition $SERVICE:$TASK_REVISION --desired-count 1
 
-				'''
+	// 			'''
 
-			}
+	// 		}
 
- 		}
+ 	// 	}
 
-  	}
+  	// }
 
-	stage('verify deployment'){
+	// stage('verify deployment'){
 
-		steps {
+	// 	steps {
 
- 			script {
+ 	// 		script {
 
-			    sh label: 'Verify-Deploy', script: '''#!/bin/bash
+	// 		    sh label: 'Verify-Deploy', script: '''#!/bin/bash
 
-                # wait untiil the service is stable
-				aws ecs wait services-stable --cluster $CLUSTER --region $REGION --service $SERVICE
+    //             # wait untiil the service is stable
+	// 			aws ecs wait services-stable --cluster $CLUSTER --region $REGION --service $SERVICE
 
-				'''
+	// 			'''
 
-			}
+	// 		}
 
- 		}
+ 	// 	}
 
-  	}
+  	// }
 
   }
 
