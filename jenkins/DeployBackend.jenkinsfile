@@ -52,7 +52,8 @@ pipeline {
   		steps {
 
   		checkout([$class: 'GitSCM',
-			branches: [[name: '*/main']],
+			//branches: [[name: '*/main']],
+			branches: [[name: '*/deploy_test']],
 			extensions: [[$class: 'SubmoduleOption', 
 			recursiveSubmodules: true],
 			[$class: 'RelativeTargetDirectory',
@@ -87,7 +88,7 @@ pipeline {
 				// set template file name
 				// env.TEMPLATE_FILE="ccdi-federation-api-deployments/aws/${APP}_task.json"
 				// env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task_cloudwatch.json"
-				env.TEMPLATE_FILE="ccdi-federation-api-deployments/aws/${APP}_task.yml"
+				// env.TEMPLATE_FILE="ccdi-federation-api-deployments/aws/${APP}_task.yml"
 
 			}
 
@@ -132,9 +133,24 @@ pipeline {
 				export ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 				export IMAGE_ID="$REPO_URL:$IMAGE_TAG"
 
+				TEMPLATE_PATH="ccdi-federation-api-deployments/aws"
+
+				# DEBUG
+				echo "$ACCOUNT_ID"
+				echo "$IMAGE_ID"
+				echo "$TEMPLATE_PATH"
+				cat $TEMPLATE_PATH/${APP}_task.yml
+				
 				# Update and register task definition
-				envsubst < $TEMPLATE_FILE > $TEMPLATE_FILE
-				aws ecs register-task-definition --cli-input-yaml file://$TEMPLATE_FILE
+				envsubst < $TEMPLATE_PATH/${APP}_task.yml > $TEMPLATE_PATH/${APP}_task-deploy.yml
+
+				# DEBUG
+				echo "$TEMPLATE_PATH"
+				cat $TEMPLATE_PATH/${APP}_task-deploy.yml
+
+				#aws ecs register-task-definition --cli-input-yaml file://$TEMPLATE_FILE
+
+				docker run -v ./$TEMPLATE_PATH:/aws/ --rm --name aws-cli amazon/aws-cli ecs register-task-definition --cli-input-yaml file:///aws/${APP}_task-deploy.yml
 
 				'''
 
@@ -145,59 +161,59 @@ pipeline {
 
   	}
 
-    stage('Update Service'){
+    // stage('Update Service'){
 
- 		steps {
+ 	// 	steps {
 
- 			script {
+ 	// 		script {
 
-			    sh label: 'Service-Update', script: '''#!/bin/bash
+	// 		    sh label: 'Service-Update', script: '''#!/bin/bash
 
-				# Redeploy Service Using The Latest Task Definition
-				echo "Updating Service: $SERVICE"
+	// 			# Redeploy Service Using The Latest Task Definition
+	// 			echo "Updating Service: $SERVICE"
 
-				TASK_REVISION=$(aws ecs describe-task-definition --task-definition $SERVICE | egrep "revision" | awk '{print $2}' | sed 's/,//')
-				aws ecs update-service --cluster $CLUSTER --region $REGION --service $SERVICE --task-definition $SERVICE:$TASK_REVISION --desired-count 1
+	// 			TASK_REVISION=$(aws ecs describe-task-definition --task-definition $SERVICE | egrep "revision" | awk '{print $2}' | sed 's/,//')
+	// 			aws ecs update-service --cluster $CLUSTER --region $REGION --service $SERVICE --task-definition $SERVICE:$TASK_REVISION --desired-count 1
 
-				'''
+	// 			'''
 
-			}
+	// 		}
 
- 		}
+ 	// 	}
 
-  	}
+  	// }
 
-	stage('verify deployment'){
+	// stage('verify deployment'){
 
-		steps {
+	// 	steps {
 
- 			script {
+ 	// 		script {
 
-			    sh label: 'Verify-Deploy', script: '''#!/bin/bash
+	// 		    sh label: 'Verify-Deploy', script: '''#!/bin/bash
 
-                # wait untiil the service is stable
-				aws ecs wait services-stable --cluster $CLUSTER --region $REGION --service $SERVICE
+    //             # wait untiil the service is stable
+	// 			aws ecs wait services-stable --cluster $CLUSTER --region $REGION --service $SERVICE
 
-				'''
+	// 			'''
 
-			}
+	// 		}
 
- 		}
+ 	// 	}
 
-  	}
+  	// }
 
   }
 
   post {
 
-    always {
+    // always {
 
-        notify(
-            secretPath: "notification/slack",
-            secretName: "${env.SLACK_SECRET}"
-        ) 
+    //     notify(
+    //         secretPath: "notification/slack",
+    //         secretName: "${env.SLACK_SECRET}"
+    //     ) 
 
-    }
+    // }
 
     cleanup {
 
