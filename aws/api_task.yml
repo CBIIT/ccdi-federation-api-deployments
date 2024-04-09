@@ -1,7 +1,7 @@
 family: "ccdi-$ENV-federation-api"
 networkMode: awsvpc
-cpu: "512"
-memory: "1024"
+cpu: "1024"
+memory: "2048"
 executionRoleArn: "arn:aws:iam::$ACCOUNT_ID:role/power-user-ccdi-$ENV-federation-ecs-task-execution-role"  #task id
 taskRoleArn: "arn:aws:iam::$ACCOUNT_ID:role/power-user-ccdi-$ENV-federation-ecs-task-role" #taskid
 requiresCompatibilities:
