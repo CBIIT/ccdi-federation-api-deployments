@@ -140,17 +140,21 @@ pipeline {
 				echo "$IMAGE_ID"
 				echo "$TASK_DEFINTION"
 				cat $TASK_DEFINTION
+				echo "$TEMPLATE_FILE"
+				cat $TEMPLATE_FILE
 				
 				# Update and register task definition
-				envsubst < $TASK_DEFINTION > $TASK_DEFINTION
+				#envsubst < $TASK_DEFINTION > $TASK_DEFINTION
+				envsubst < $TEMPLATE_FILE > $TEMPLATE_FILE
 
 				# DEBUG
-				echo "$TASK_DEFINTION"
-				cat $TASK_DEFINTION
+				echo "$TEMPLATE_FILE"
+				cat $TEMPLATE_FILE
 
 				#aws ecs register-task-definition --cli-input-yaml file://$TEMPLATE_FILE
 
-				docker run --rm --name aws-cli amazon/aws-cli ecs register-task-definition --cli-input-yaml file://$TASK_DEFINTION
+				#docker run --rm --name aws-cli amazon/aws-cli ecs register-task-definition --cli-input-yaml file://$TASK_DEFINTION
+				docker run --rm --name aws-cli amazon/aws-cli ecs register-task-definition --cli-input-yaml file://$TEMPLATE_FILE
 
 				'''
 
