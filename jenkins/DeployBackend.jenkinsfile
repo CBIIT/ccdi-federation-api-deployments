@@ -142,13 +142,13 @@ pipeline {
 				# Update and register task definition
 				#envsubst < $TASK_DEFINTION > $TASK_DEFINTION
 
+				# DEBUG
 				echo "$TASK_DEFINTION"
 				cat $TASK_DEFINTION
 
-
 				#aws ecs register-task-definition --cli-input-yaml file://$TEMPLATE_FILE
 
-				docker run --rm -it amazon/aws-cli ecs register-task-definition --cli-input-yaml file://$TEMPLATE_FILE
+				docker run --rm -it amazon/aws-cli ecs register-task-definition --cli-input-yaml file://$TASK_DEFINTION
 
 				'''
 
