@@ -161,46 +161,46 @@ pipeline {
 
   	}
 
-    // stage('Update Service'){
+    stage('Update Service'){
 
- 	// 	steps {
+ 		steps {
 
- 	// 		script {
+ 			script {
 
-	// 		    sh label: 'Service-Update', script: '''#!/bin/bash
+			    sh label: 'Service-Update', script: '''#!/bin/bash
 
-	// 			# Redeploy Service Using The Latest Task Definition
-	// 			echo "Updating Service: $SERVICE"
+				# Redeploy Service Using The Latest Task Definition
+				echo "Updating Service: $SERVICE"
 
-	// 			TASK_REVISION=$(aws ecs describe-task-definition --task-definition $SERVICE | egrep "revision" | awk '{print $2}' | sed 's/,//')
-	// 			aws ecs update-service --cluster $CLUSTER --region $REGION --service $SERVICE --task-definition $SERVICE:$TASK_REVISION --desired-count 1
+				TASK_REVISION=$(aws ecs describe-task-definition --task-definition $SERVICE | egrep "revision" | awk '{print $2}' | sed 's/,//')
+				aws ecs update-service --cluster $CLUSTER --region $REGION --service $SERVICE --task-definition $SERVICE:$TASK_REVISION --desired-count 1
 
-	// 			'''
+				'''
 
-	// 		}
+			}
 
- 	// 	}
+ 		}
 
-  	// }
+  	}
 
-	// stage('verify deployment'){
+	stage('verify deployment'){
 
-	// 	steps {
+		steps {
 
- 	// 		script {
+ 			script {
 
-	// 		    sh label: 'Verify-Deploy', script: '''#!/bin/bash
+			    sh label: 'Verify-Deploy', script: '''#!/bin/bash
 
-    //             # wait untiil the service is stable
-	// 			aws ecs wait services-stable --cluster $CLUSTER --region $REGION --service $SERVICE
+                # wait untiil the service is stable
+				aws ecs wait services-stable --cluster $CLUSTER --region $REGION --service $SERVICE
 
-	// 			'''
+				'''
 
-	// 		}
+			}
 
- 	// 	}
+ 		}
 
-  	// }
+  	}
 
   }
 
