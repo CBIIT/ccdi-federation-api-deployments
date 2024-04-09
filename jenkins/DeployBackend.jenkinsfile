@@ -73,7 +73,7 @@ pipeline {
 
 			    // set sumo vars for logging
 				env.SUMO_COLLECTOR_ENDPOINT = sh(label: 'Get Sumo Endpoint', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.sumo_collector_endpoint'").trim()
-				env.SUMO_COLLECTOR_TOKEN = sh(label: 'Get Sumo Token', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.sumo_collector_token_$APP'").trim()
+				env.SUMO_COLLECTOR_TOKEN = sh(label: 'Get Sumo Token', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.sumo_collector_token'").trim()
 
 				// set neo4j vars
 				// env.NEO4J_HOST = sh(label: 'Get Neo4j Host', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.neo4j_ip'").trim()
@@ -138,7 +138,7 @@ pipeline {
 				echo "$ACCOUNT_ID"
 				echo "$IMAGE_ID"
 				echo $SUMO_COLLECTOR_ENDPOINT
-				echo $SUMO_COLLECTOR_TOKEN 
+				echo $SUMO_COLLECTOR_TOKEN
 				echo "$TEMPLATE_PATH"
 				cat $TEMPLATE_PATH/${APP}_task.yml
 				
