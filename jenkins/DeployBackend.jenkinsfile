@@ -36,7 +36,7 @@ pipeline {
 	APP          = "api"
 	SLACK_SECRET = "federation_slack_url"
 	REGION       = "us-east-1"
-	ECR_REPO     = "ccdi-federation"
+	ECR_REPO     = "ccdi-federation-api"
 	DEPLOY_REPO  = "ccdi-federation-api-deployments"
 	IMAGE_TAG    = "${params.ImageTag}"
 	ENV          = "${params.Environment}"
@@ -81,7 +81,7 @@ pipeline {
 				env.ECR_ACCOUNT = sh(label: 'Get ECR account', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.ecr_account'").trim()
 
 				// set repo URL
-				// env.REPO_URL = "${ECR_ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO}"
+				env.REPO_URL = "${ECR_ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO}"
                 // env.federation_apis = sh(label 'Get federation_apis', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.federation_apis'").trim()
                 
 				// set template file name
