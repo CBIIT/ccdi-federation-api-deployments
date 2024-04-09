@@ -133,15 +133,17 @@ pipeline {
 				export ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 				export IMAGE_ID="$REPO_URL:$IMAGE_TAG"
 
+				TASK_DEFINTION=$WORKSPACE/$TEMPLATE_FILE
+
 				# DEBUG
-				echo "$TEMPLATE_FILE"
-				cat $TEMPLATE_FILE
+				echo "$TASK_DEFINTION"
+				cat $TASK_DEFINTION
 				
 				# Update and register task definition
-				envsubst < $TEMPLATE_FILE > $TEMPLATE_FILE
+				envsubst < $TASK_DEFINTION > $TASK_DEFINTION
 
-				echo "$TEMPLATE_FILE"
-				cat $TEMPLATE_FILE
+				echo "$TASK_DEFINTION"
+				cat $TASK_DEFINTION
 
 
 				aws ecs register-task-definition --cli-input-yaml file://$TEMPLATE_FILE
