@@ -133,11 +133,17 @@ pipeline {
 				export ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 				export IMAGE_ID="$REPO_URL:$IMAGE_TAG"
 
+				# DEBUG
+				echo "$TEMPLATE_FILE"
+				cat $TEMPLATE_FILE
+				
 				# Update and register task definition
 				envsubst < $TEMPLATE_FILE > $TEMPLATE_FILE
 
 				echo "$TEMPLATE_FILE"
 				cat $TEMPLATE_FILE
+
+
 				aws ecs register-task-definition --cli-input-yaml file://$TEMPLATE_FILE
 
 				'''
@@ -194,14 +200,14 @@ pipeline {
 
   post {
 
-    always {
+    // always {
 
-        notify(
-            secretPath: "notification/slack",
-            secretName: "${env.SLACK_SECRET}"
-        ) 
+    //     notify(
+    //         secretPath: "notification/slack",
+    //         secretName: "${env.SLACK_SECRET}"
+    //     ) 
 
-    }
+    // }
 
     cleanup {
 
