@@ -61,7 +61,7 @@ containerDefinitions:
   - name: "NEW_RELIC_LABELS"
     value: "Project:$PROJECT;Environment:$ENV"
   - name: "NEW_RELIC_APP_NAME"
-    value: "$PROJECT-$ENV-api"
+    value: "ccdi-$PROJECT-$ENV-api"
   - name: "JAVA_OPTS"
     value: "-javaagent:/usr/local/tomcat/newrelic/newrelic.jar"
   - name: "tier"
