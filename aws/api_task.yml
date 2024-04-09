@@ -2,8 +2,8 @@ family: "$PROGRAM-$ENV-$PROJECT-backend"
 networkMode: awsvpc
 cpu: "512"
 memory: "1024"
-executionRoleArn: "arn:aws:iam::$AWS_ACCOUNT_ID:role/power-user-$PROJECT-$ENV-ecs-task-execution-role"
-taskRoleArn: "arn:aws:iam::$AWS_ACCOUNT_ID:role/power-user-$PROJECT-$ENV-ecs-task-role"
+executionRoleArn: "arn:aws:iam::$AWS_ACCOUNT_ID:role/ccdi-$ENV-federation-ecs-task-execution-role"
+taskRoleArn: "arn:aws:iam::$AWS_ACCOUNT_ID:role/power-user-ccdi-$ENV-federation-ecs-task-role"
 requiresCompatibilities:
 - FARGATE
 containerDefinitions:
