@@ -136,11 +136,13 @@ pipeline {
 				TASK_DEFINTION=$WORKSPACE/$TEMPLATE_FILE
 
 				# DEBUG
+				echo "$ACCOUNT_ID"
+				echo "$IMAGE_ID"
 				echo "$TASK_DEFINTION"
 				cat $TASK_DEFINTION
 				
 				# Update and register task definition
-				#envsubst < $TASK_DEFINTION > $TASK_DEFINTION
+				envsubst < $TASK_DEFINTION > $TASK_DEFINTION
 
 				# DEBUG
 				echo "$TASK_DEFINTION"
@@ -148,7 +150,7 @@ pipeline {
 
 				#aws ecs register-task-definition --cli-input-yaml file://$TEMPLATE_FILE
 
-				docker run --rm -it amazon/aws-cli ecs register-task-definition --cli-input-yaml file://$TASK_DEFINTION
+				docker run --rm --name aws-cli amazon/aws-cli ecs register-task-definition --cli-input-yaml file://$TASK_DEFINTION
 
 				'''
 
