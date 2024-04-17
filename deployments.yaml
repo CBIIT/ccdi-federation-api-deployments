@@ -9,6 +9,6 @@ services:
     image: 2.2.0.139
     buildNumber: '139'
   api:
-    version: dockerfile_change.46
-    image: dockerfile_change.46
-    buildNumber: '46'
+    version: main.49
+    image: main.49
+    buildNumber: '49'
