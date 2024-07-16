@@ -1,11 +1,11 @@
 resource "aws_s3_bucket" "kinesis" {
-  count = terraform.workspace == "prod" || terraform.workspace == "prod" ? 1 : 0
+  count = terraform.workspace == "dev" || terraform.workspace == "stage" ? 1 : 0
 
   bucket = "${var.program}-${local.account_level}-${var.project}-kinesis-log-failures"
 }
 
 resource "aws_s3_bucket_public_access_block" "kinesis" {
-  count = terraform.workspace == "prod" || terraform.workspace == "prod" ? 1 : 0
+  count = terraform.workspace == "dev" || terraform.workspace == "stage" ? 1 : 0
 
   bucket                  = aws_s3_bucket.kinesis[0].bucket
   block_public_acls       = true
@@ -22,7 +22,7 @@ resource "aws_s3_bucket_public_access_block" "kinesis" {
 #}
 
 data "aws_iam_policy_document" "kenisis" {
-  count = terraform.workspace == "prod" || terraform.workspace == "prod" ? 1 : 0
+  count = terraform.workspace == "dev" || terraform.workspace == "stage" ? 1 : 0
 
   statement {
     effect = "Allow"

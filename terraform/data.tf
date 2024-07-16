@@ -10,7 +10,7 @@ data "aws_vpc" "vpc" {
 }
 
 data "aws_subnets" "public" {
-  count = terraform.workspace == "prod" ? 0 : 1
+  count = terraform.workspace == "dev" ? 0 : 1
 
   filter {
     name   = "vpc-id"
@@ -51,7 +51,7 @@ data "aws_acm_certificate" "domain" {
 }
 
 data "aws_iam_policy_document" "jenkins_trust" {
-  count = terraform.workspace == "prod" || terraform.workspace == "prod" ? 1 : 0
+  count = terraform.workspace == "dev" || terraform.workspace == "stage" ? 1 : 0
 
   statement {
     effect  = "Allow"
@@ -67,7 +67,7 @@ data "aws_iam_policy_document" "jenkins_trust" {
 }
 
 data "aws_iam_policy_document" "jenkins" {
-  count = terraform.workspace == "prod" || terraform.workspace == "prod" ? 1 : 0
+  count = terraform.workspace == "dev" || terraform.workspace == "stage" ? 1 : 0
 
   statement {
     effect = "Allow"
