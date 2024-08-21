@@ -173,6 +173,7 @@ data "aws_iam_policy_document" "jenkins" {
     actions = [
       "ecr:BatchCheckLayerAvailability",
       "ecr:BatchGetRepositoryScanningConfiguration",
+      "ecr:BatchGetImages",
       "ecr:BatchImportUpstreamImage",
       "ecr:CompleteLayerUpload",
       "ecr:DescribeImageReplicationStatus",
