@@ -8,6 +8,6 @@ resource "aws_secretsmanager_secret_version" "secret" {
   secret_string = jsonencode(local.secrets)
 
   lifecycle {
-    ignore_changes = [ secret_string ]
+    ignore_changes = [secret_string]
   }
 }
