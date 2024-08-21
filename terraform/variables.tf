@@ -44,6 +44,7 @@ variable "project" {
 variable "tags" {
   description = "tags to associate with this instance"
   type        = map(string)
+  default     = {}
 }
 
 variable "sumo_logic_api_key" {
