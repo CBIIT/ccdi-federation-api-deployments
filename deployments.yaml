@@ -9,6 +9,6 @@ services:
     image: 2.2.0.139
     buildNumber: '139'
   api:
-    version: rc-v1.0.1.65
-    image: rc-v1.0.1.65
-    buildNumber: '65'
+    version: nr-main.68
+    image: nr-main.68
+    buildNumber: '68'
