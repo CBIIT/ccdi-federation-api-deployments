@@ -63,7 +63,7 @@ containerDefinitions:
   - name: "NEW_RELIC_APP_NAME"
     value: "ccdi-$PROJECT-$ENV-api"
   - name: "NEW_RELIC_LICENSE_KEY"
-    valueFrom: "arn:aws:secretsmanager:$REGION:$ACCOUNT_ID:secret:monitoring/newrelic:api_key::"
+    value: "$NEW_RELIC_LICENSE_KEY"
   - name: "JAVA_OPTS"
     value: "-javaagent:/usr/local/tomcat/newrelic/newrelic.jar"
   - name: "tier"
