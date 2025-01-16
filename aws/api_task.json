@@ -70,6 +70,10 @@
                 {
                     "name": "NRIA_OVERRIDE_HOST_ROOT",
                     "value": ""
+                },
+                {
+                    "name": "NEW_RELIC_LICENSE_KEY",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:monitoring/newrelic:api_key::"
                 }
             ],
             "mountPoints": [],
