@@ -73,7 +73,7 @@
                 },
                 {
                     "name": "NEW_RELIC_LICENSE_KEY",
-                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:monitoring/newrelic:api_key::"
+                    "value": "{{NEW_RELIC_LICENSE_KEY}}"
                 }
             ],
             "mountPoints": [],

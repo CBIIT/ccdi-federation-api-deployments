@@ -69,7 +69,7 @@
                 },
                 {
                     "name": "NEW_RELIC_LICENSE_KEY",
-                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:ccdi-{{environment}}-federation-secrets/newrelic:api_key::"
+                    "value": "954d4fec959bfe5a1a174479b6e64d12FFFFNRAL"
                 },
                 {
                     "name": "NRIA_OVERRIDE_HOST_ROOT",
