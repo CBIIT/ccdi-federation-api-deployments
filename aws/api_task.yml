@@ -38,7 +38,7 @@ containerDefinitions:
     value: ""
   secrets:
   - name: "NRIA_LICENSE_KEY"
-    valueFrom: "arn:aws:secretsmanager:$REGION:$ACCOUNT_ID:secret:monitoring/newrelic:api_key::"
+    value: "arn:aws:secretsmanager:$REGION:$ACCOUNT_ID:secret:monitoring/newrelic:api_key::"
 
 - name: api
   image: "$IMAGE_ID"
