@@ -116,6 +116,10 @@
                 {
                     "name": "federation_apis",
                     "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:ccdi-{{environment}}-federation-secrets:neo4j_user::"
+                },
+                {
+                    "name": "federation_sources",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:ccdi-{{environment}}-federation-secrets:neo4j_user::"
                 }
             ],
             "environment": [
