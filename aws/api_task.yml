@@ -70,6 +70,8 @@ containerDefinitions:
     value: "$ENV"
   - name: "federation_apis"
     value: "$FEDERATION_APIS"
+  - name: "federation_sources"
+    value: "$FEDERATION_SOURCES"
 
   logConfiguration:
     logDriver: awsfirelens
