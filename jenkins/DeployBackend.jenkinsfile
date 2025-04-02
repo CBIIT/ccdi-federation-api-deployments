@@ -84,7 +84,11 @@ pipeline {
 				// set repo URL
 				env.REPO_URL = "${ECR_ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO}"
                 env.FEDERATION_APIS = sh(label: 'Get federation_apis', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.federation_apis'").trim()
-				env.FEDERATION_SOURCES = sh(label: 'Get federation_sources', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.federation_sources'").trim()                
+				env.FEDERATION_SOURCES = sh(label: 'Get federation_sources', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.federation_sources'").trim()
+				env.CPI_CLIENT_ID = sh(label: 'Get cpi client id', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id cpi --query SecretString --output text | jq -r '.cpi_client_id'").trim()
+				env.CPI_CLIENT_SECRET = sh(label: 'Get cpi client secret', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id cpi --query SecretString --output text | jq -r '.cpi_client_secret'").trim()
+				env.CPI_TOKEN_URL = sh(label: 'Get cpi client secret', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id cpi --query SecretString --output text | jq -r '.cpi_token_url'").trim()
+				env.CPI_URL = sh(label: 'Get cpi client secret', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id cpi --query SecretString --output text | jq -r '.cpi_url'").trim()                
 				// set template file name
 				// env.TEMPLATE_FILE="ccdi-federation-api-deployments/aws/${APP}_task.json"
 				// env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task_cloudwatch.json"
