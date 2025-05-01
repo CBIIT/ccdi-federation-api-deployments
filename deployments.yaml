@@ -9,6 +9,6 @@ services:
     image: 2.2.0.139
     buildNumber: '139'
   api:
-    version: rc-ecdna-v1.1.0.84
-    image: rc-ecdna-v1.1.0.84
-    buildNumber: '84'
+    version: rc-v1.1.0.85
+    image: rc-v1.1.0.85
+    buildNumber: '85'
