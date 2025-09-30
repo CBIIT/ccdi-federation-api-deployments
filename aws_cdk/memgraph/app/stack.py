@@ -229,7 +229,10 @@ class Stack(Stack):
             )
         )
         listener.add_target_groups("target", nlbTargetGroup)
-        nlbTargetGroup.add_target(ECSService)
+        nlbTargetGroup.add_target(ECSService,
+            port=config.getint('ecs', 'port'),
+            targets_using_port=elbv2.TargetGroupTargetPort.explicit(config.getint('ecs', 'port'))
+        )
 
         listener_7444 = NLB.add_listener("Listener7444", port=7444)
         nlbTargetGroup7444 = elbv2.NetworkTargetGroup(self,
@@ -244,4 +247,7 @@ class Stack(Stack):
             )
         )
         listener_7444.add_target_groups("target7444", nlbTargetGroup7444)
-        nlbTargetGroup7444.add_target(ECSService)
+        nlbTargetGroup7444.add_target(ECSService, 
+            port=7444,
+            targets_using_port=elbv2.TargetGroupTargetPort.explicit(7444)
+        )
