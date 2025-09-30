@@ -222,7 +222,11 @@ class Stack(Stack):
             target_type=elbv2.TargetType.IP,
             protocol=elbv2.Protocol.TCP,
             port=config.getint('ecs', 'port'),
-            vpc=vpc
+            vpc=vpc,
+            health_check=elbv2.HealthCheck(
+                port=str(config.getint('ecs', 'port')),
+                protocol=elbv2.Protocol.TCP
+            )
         )
         listener.add_target_groups("target", nlbTargetGroup)
         nlbTargetGroup.add_target(ECSService)
@@ -233,7 +237,11 @@ class Stack(Stack):
             target_type=elbv2.TargetType.IP,
             protocol=elbv2.Protocol.TCP,
             port=7444,
-            vpc=vpc
+            vpc=vpc,
+            health_check=elbv2.HealthCheck(
+                port="7444",
+                protocol=elbv2.Protocol.TCP
+            )
         )
         listener_7444.add_target_groups("target7444", nlbTargetGroup7444)
         nlbTargetGroup7444.add_target(ECSService)
