@@ -4,5 +4,5 @@ constructs>=10.0.0,<11.0.0
 configparser
 boto3
 jsii
-PyYAML
+PyYAML>=6.0
 cdk-ec2-key-pair
