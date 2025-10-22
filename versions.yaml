@@ -1,0 +1,5 @@
+Notes: Service Versions
+project: bento
+services:
+    memgraph:
+        version: 3.2
