@@ -42,6 +42,8 @@ jobs:
     
     - name: Get config files
       id: get-config
+      env:
+        MEMGRAPH_IMAGE:
       shell: bash
       run: |
         vars=$(python3 scripts/readYML.py versions.yaml)
