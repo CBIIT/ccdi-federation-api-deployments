@@ -12,6 +12,10 @@ on:
         options:
           - dev
           - custom_tier
+      memgraph_image:
+        description: 'Docker image for the Memgraph service'
+        required: true
+        default: '3.2'
       cdk_command:
         description: 'Which CDK Command To Run'
         required: true
@@ -61,6 +65,7 @@ jobs:
       id: get-config
       env:
         ENV_NAME: ${{ inputs.environment }}
+        MEMGRAPH_IMAGE: ${{ inputs.memgraph_image }}
         BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
       run: |
         if [[ "$ENV_NAME" =~ ^(dev|qa|stage|prod)$ ]]; then
@@ -71,8 +76,11 @@ jobs:
           echo "Updated branch name is $BRANCH_NAME"
         fi
 
-        # vars=$(python3 scripts/readYML.py versions.yaml)
-        # for v in $vars; do command="export $v"; eval $command;  done
+        vars=$(python3 scripts/readYML.py versions.yaml)
+        for v in $vars; do command="export $v"; eval $command;  done
+
+        MEMGRAPH_IMAGE="${MEMGRAPH_IMAGE:-$IMAGE_MEMGRAPH}"
+        echo "MEMGRAPH_IMAGE=$MEMGRAPH_IMAGE" >> $GITHUB_ENV
 
         cd aws_cdk/memgraph/
         aws s3api get-object --bucket federation-cdk-config --key config/config.ini.$ENV_NAME ./config.ini.$ENV_NAME
@@ -90,25 +98,25 @@ jobs:
 
         cd aws_cdk/memgraph && cdk $CDK_CMD --require-approval=never --force
 
-    # - name: Update versions file
-    #   env:
-    #     CDK_CMD: ${{ inputs.cdk_command }}
-    #     ENV_NAME: ${{ inputs.environment }}
-    #   run: |
-    #     if [ "${CDK_CMD}" == "deploy" ] && [ "${ENV_NAME}" == "dev" ]; then
-    #       echo "Updating versions.yaml file"
-    #       python3 scripts/writeYML.py versions.yaml
-    #     else
-    #       echo "Skipping versions.yaml file update"
-    #     fi
+    - name: Update versions file
+      env:
+        CDK_CMD: ${{ inputs.cdk_command }}
+        ENV_NAME: ${{ inputs.environment }}
+      run: |
+        if [ "${CDK_CMD}" == "deploy" ] && [ "${ENV_NAME}" == "dev" ]; then
+          echo "Updating versions.yaml file"
+          python3 scripts/writeYML.py versions.yaml
+        else
+          echo "Skipping versions.yaml file update"
+        fi
 
-    #     git config --local user.name actions-user
-    #     git config --local user.email "actions@github.com"
-    #     if ! git diff --exit-code; then
-    #         git add versions.yaml
-    #         git commit -am "GH Action - Versions File updated $(date)"
-    #         git push -f origin ${{ github.head_ref || github.ref_name }}
-    #     fi
+        git config --local user.name actions-user
+        git config --local user.email "actions@github.com"
+        if ! git diff --exit-code; then
+            git add versions.yaml
+            git commit -am "GH Action - Versions File updated $(date)"
+            git push -f origin ${{ github.head_ref || github.ref_name }}
+        fi
   
     - name: Slack Notification
       env:
