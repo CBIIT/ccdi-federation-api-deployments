@@ -71,8 +71,8 @@ jobs:
           echo "Updated branch name is $BRANCH_NAME"
         fi
 
-        vars=$(python3 scripts/readYML.py versions.yaml)
-        for v in $vars; do command="export $v"; eval $command;  done
+        # vars=$(python3 scripts/readYML.py versions.yaml)
+        # for v in $vars; do command="export $v"; eval $command;  done
 
         cd aws_cdk/memgraph/
         aws s3api get-object --bucket inventory-cdk-config --key config/config.ini.$ENV_NAME ./config.ini.$ENV_NAME
@@ -90,25 +90,25 @@ jobs:
 
         cd aws_cdk/memgraph && cdk $CDK_CMD --require-approval=never --force
 
-    - name: Update versions file
-      env:
-        CDK_CMD: ${{ inputs.cdk_command }}
-        ENV_NAME: ${{ inputs.environment }}
-      run: |
-        if [ "${CDK_CMD}" == "deploy" ] && [ "${ENV_NAME}" == "dev" ]; then
-          echo "Updating versions.yaml file"
-          python3 scripts/writeYML.py versions.yaml
-        else
-          echo "Skipping versions.yaml file update"
-        fi
+    # - name: Update versions file
+    #   env:
+    #     CDK_CMD: ${{ inputs.cdk_command }}
+    #     ENV_NAME: ${{ inputs.environment }}
+    #   run: |
+    #     if [ "${CDK_CMD}" == "deploy" ] && [ "${ENV_NAME}" == "dev" ]; then
+    #       echo "Updating versions.yaml file"
+    #       python3 scripts/writeYML.py versions.yaml
+    #     else
+    #       echo "Skipping versions.yaml file update"
+    #     fi
 
-        git config --local user.name actions-user
-        git config --local user.email "actions@github.com"
-        if ! git diff --exit-code; then
-            git add versions.yaml
-            git commit -am "GH Action - Versions File updated $(date)"
-            git push -f origin ${{ github.head_ref || github.ref_name }}
-        fi
+    #     git config --local user.name actions-user
+    #     git config --local user.email "actions@github.com"
+    #     if ! git diff --exit-code; then
+    #         git add versions.yaml
+    #         git commit -am "GH Action - Versions File updated $(date)"
+    #         git push -f origin ${{ github.head_ref || github.ref_name }}
+    #     fi
   
     - name: Slack Notification
       env:
