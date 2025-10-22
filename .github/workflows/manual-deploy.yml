@@ -1,4 +1,4 @@
-name: Inventory CDK Manual Workflow
+name: federation CDK Manual Workflow
 permissions: 
   contents: write
   id-token: write
