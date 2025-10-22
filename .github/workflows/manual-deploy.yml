@@ -75,7 +75,7 @@ jobs:
         # for v in $vars; do command="export $v"; eval $command;  done
 
         cd aws_cdk/memgraph/
-        aws s3api get-object --bucket inventory-cdk-config --key config/config.ini.$ENV_NAME ./config.ini.$ENV_NAME
+        aws s3api get-object --bucket federation-cdk-config --key config/config.ini.$ENV_NAME ./config.ini.$ENV_NAME
         
         envsubst < config.ini.$ENV_NAME > config.ini
 
