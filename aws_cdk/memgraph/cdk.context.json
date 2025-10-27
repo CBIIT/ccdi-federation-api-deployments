@@ -1,5 +1,5 @@
 {
-  "availability-zones:account=245214250451:region=us-east-1": [
+  "availability-zones:account=028460101710:region=us-east-1": [
     "us-east-1a",
     "us-east-1b",
     "us-east-1c",
@@ -7,7 +7,7 @@
     "us-east-1e",
     "us-east-1f"
   ],
-  "vpc-provider:account=245214250451:filter.vpc-id=vpc-29a12251:region=us-east-1:returnAsymmetricSubnets=true": {
+  "vpc-provider:account=028460101710:filter.vpc-id=vpc-29a12251:region=us-east-1:returnAsymmetricSubnets=true": {
     "vpcId": "vpc-29a12251",
     "vpcCidrBlock": "10.208.0.0/21",
     "ownerAccountId": "019211168375",
@@ -69,7 +69,7 @@
       }
     ]
   },
-  "vpc-provider:account=245214250451:filter.vpc-id=vpc-dca724a4:region=us-east-1:returnAsymmetricSubnets=true": {
+  "vpc-provider:account=028460101710:filter.vpc-id=vpc-dca724a4:region=us-east-1:returnAsymmetricSubnets=true": {
     "vpcId": "vpc-dca724a4",
     "vpcCidrBlock": "10.208.8.0/21",
     "ownerAccountId": "019211168375",
@@ -131,7 +131,7 @@
       }
     ]
   },
-  "vpc-provider:account=511690009290:filter.vpc-id=vpc-c29e1dba:region=us-east-1:returnAsymmetricSubnets=true": {
+  "vpc-provider:account=427244650436:filter.vpc-id=vpc-c29e1dba:region=us-east-1:returnAsymmetricSubnets=true": {
     "vpcId": "vpc-c29e1dba",
     "vpcCidrBlock": "10.208.16.0/21",
     "ownerAccountId": "019211168375",
@@ -193,7 +193,7 @@
       }
     ]
   },
-  "vpc-provider:account=511690009290:filter.vpc-id=vpc-0bab2873:region=us-east-1:returnAsymmetricSubnets=true": {
+  "vpc-provider:account=427244650436:filter.vpc-id=vpc-0bab2873:region=us-east-1:returnAsymmetricSubnets=true": {
     "vpcId": "vpc-0bab2873",
     "vpcCidrBlock": "10.208.24.0/21",
     "ownerAccountId": "019211168375",
