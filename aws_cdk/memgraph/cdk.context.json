@@ -224,13 +224,13 @@
           {
             "subnetId": "subnet-4c35f111",
             "cidr": "10.208.26.0/23",
-            "availabilityZone": "us-east-1c",
+            "availabilityZone": "us-east-1d",
             "routeTableId": "rtb-0fac1fd55e479ef60"
           },
           {
             "subnetId": "subnet-8de37de9",
             "cidr": "10.208.30.0/23",
-            "availabilityZone": "us-east-1d",
+            "availabilityZone": "us-east-1a",
             "routeTableId": "rtb-0fac1fd55e479ef60"
           }
         ]
