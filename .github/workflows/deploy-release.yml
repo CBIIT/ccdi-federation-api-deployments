@@ -42,8 +42,19 @@ jobs:
 
     - name: Get Artifacts From S3
       id: get-artifacts-diff
+      env:
+        MEMGRAPH_IMAGE:
       shell: bash
       run: |
+        vars=$(python3 scripts/readYML.py versions.yaml)
+        for v in $vars; do command="export $v"; eval $command;  done
+
+        MEMGRAPH_IMAGE=$IMAGE_MEMGRAPH
+
+        echo "MEMGRAPH_IMAGE=$MEMGRAPH_IMAGE"
+
+        echo "MEMGRAPH_IMAGE=$MEMGRAPH_IMAGE" >> $GITHUB_ENV
+        
         ver_string=${{ inputs.release_number }}
         app_version="${ver_string%.*}"
 
