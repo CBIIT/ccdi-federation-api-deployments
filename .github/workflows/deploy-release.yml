@@ -73,9 +73,9 @@ jobs:
         ver_string=${{ inputs.release_number }}
         app_version="${ver_string%.*}"
 
-        aws s3api get-object --bucket federation-cdk-config --key ${{ env.MEMGRAPH_IMAGE }}/${{ inputs.environment }}.${{ inputs.release_number }}.zip ./${{ inputs.environment }}.${{ inputs.release_number }}.zip
-        unzip ./${{ inputs.environment }}.${{ inputs.release_number }}.zip
-        echo "Retrieved CDK App: ${{ inputs.environment }}.${{ inputs.release_number }}"
+        aws s3api get-object --bucket federation-cdk-config --key $MEMGRAPH_IMAGE/${{ inputs.release_number }}.zip ./${{ inputs.release_number }}.zip
+        unzip ./${{ inputs.release_number }}.zip
+        echo "Retrieved CDK App: ${{ inputs.release_number }}"
 
     - name: Diff Stack Resources
       id: diff-cdk-stack
@@ -83,7 +83,7 @@ jobs:
         AWS_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
         AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
       run: |
-        cdk diff --app ${{ inputs.environment }}.${{ inputs.release_number }}
+        cdk diff --app ${{ inputs.release_number }}
 
   federation-deploy:
     name: Federation CDK Deploy
