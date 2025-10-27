@@ -93,15 +93,25 @@ jobs:
     if: success() # Only proceed if diff job succeeds
 
     steps:
+    - name: Check out code
+      uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5     # v2.7.0
+
+    - name: Set up Python 3.9
+      uses: actions/setup-python@b64ffcaf5b410884ad320a9cfac8866006a109aa     # v4.8.0
+      with:
+        python-version: "3.9"
+
     - name: Set up Node
       id: node-setup
       uses: actions/setup-node@1a4442cacd436585916779262731d5b162bc6ec7     # v3.8.2
       with:
         node-version: "20"
-  
-    - name: Install CDK
-      id: install-cdk
+
+    - name: Install Python dependencies and CDK
       run: |
+        python -m pip install --upgrade pip
+        # install stack Python dependencies
+        cd aws_cdk/memgraph && pip3 install --ignore-installed --break-system-packages -r requirements.txt
         npm install -g aws-cdk@2.155.0
 
     - name: AWS OIDC Authentication
@@ -114,14 +124,25 @@ jobs:
 
     - name: Get Artifacts From S3
       id: get-artifacts
+      env:
+        MEMGRAPH_IMAGE:
       shell: bash
       run: |
+        vars=$(python3 scripts/readYML.py versions.yaml)
+        for v in $vars; do command="export $v"; eval $command;  done
+
+        MEMGRAPH_IMAGE=$IMAGE_MEMGRAPH
+
+        echo "MEMGRAPH_IMAGE=$MEMGRAPH_IMAGE"
+
+        echo "MEMGRAPH_IMAGE=$MEMGRAPH_IMAGE" >> $GITHUB_ENV
+
         ver_string=${{ inputs.release_number }}
         app_version="${ver_string%.*}"
 
-        aws s3api get-object --bucket federation-cdk-config --key ${{ env.MEMGRAPH_IMAGE }}/${{ inputs.environment }}.${{ inputs.release_number }}.zip ./${{ inputs.environment }}.${{ inputs.release_number }}.zip
-        unzip ./${{ inputs.environment }}.${{ inputs.release_number }}.zip
-        echo "Retrieved CDK App: ${{ inputs.environment }}.${{ inputs.release_number }}"
+        aws s3api get-object --bucket federation-cdk-config --key ${{ env.MEMGRAPH_IMAGE }}/${{ inputs.release_number }}.zip ./${{ inputs.release_number }}.zip
+        unzip ./${{ inputs.release_number }}.zip
+        echo "Retrieved CDK App: ${{ inputs.release_number }}"
 
     - name: Deploy Stack Resources
       id: deploy
@@ -129,7 +150,7 @@ jobs:
         AWS_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
         AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
       run: |
-        cdk deploy --app ${{ inputs.environment }}.${{ inputs.release_number }} --require-approval=never --force
+        cdk deploy --app ${{ inputs.release_number }} --require-approval=never --force
 
     - name: AWS Authenticate to the central ECR acct
       if: ${{ github.event.inputs.environment == 'prod' }}
