@@ -12,6 +12,7 @@ on:
         options:
           - dev
           - custom_tier
+          - qa
       memgraph_image:
         description: 'Docker image for the Memgraph service'
         required: true
