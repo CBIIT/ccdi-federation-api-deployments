@@ -8,7 +8,7 @@ on:
     inputs:
       environment:
         description: 'Which Tier to Deploy'
-        type: environment
+        type: choice
         default: dev
         options:
             - dev
