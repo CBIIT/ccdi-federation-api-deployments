@@ -83,7 +83,7 @@ jobs:
         AWS_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
         AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
       run: |
-        cdk diff --app ${{ inputs.release_number }}
+        cdk diff --app ${{ inputs.environment }}.${{ inputs.release_number }}
 
   federation-deploy:
     name: Federation CDK Deploy
