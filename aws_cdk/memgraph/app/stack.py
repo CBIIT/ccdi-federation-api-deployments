@@ -30,7 +30,7 @@ class Stack(Stack):
         
         # Secrets
         secret = secretsmanager.Secret(self, "Secret",
-            secret_name= "ccdi/nonprod/federation/memgraph-db-creds",
+            secret_name= "ccdi/{}/federation/memgraph-db-creds".format(config['main']['tier']),
             secret_object_value={
                 "db_user": SecretValue.unsafe_plain_text(config['db']['db_user']),
                 "db_pass": SecretValue.unsafe_plain_text(config['db']['db_pass']),
