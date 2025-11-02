@@ -12,3 +12,7 @@ services:
     version: v1.2.2.101
     image: v1.2.2.101
     buildNumber: '101'
+  dcc:
+    version: dev.4
+    image: dev.4
+    buildNumber: '4'
