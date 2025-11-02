@@ -1,0 +1,95 @@
+family: "ccdi-$ENV-federation-api"
+networkMode: awsvpc
+cpu: "2048"
+memory: "4096"
+executionRoleArn: "arn:aws:iam::$ACCOUNT_ID:role/power-user-ccdi-$ENV-federation-ecs-task-execution-role" 
+taskRoleArn: "arn:aws:iam::$ACCOUNT_ID:role/power-user-ccdi-$ENV-federation-ecs-task-role" 
+requiresCompatibilities:
+- FARGATE
+containerDefinitions:
+
+- name: sumologic-firelens
+  image: public.ecr.aws/aws-observability/aws-for-fluent-bit:stable
+  essential: true
+  firelensConfiguration:
+    type: fluentbit
+    options:
+      enable-ecs-log-metadata: "true"
+
+- name: newrelic-infra
+  image: newrelic/nri-ecs:1.9.2
+  essential: true
+  environment:
+  - name: "FARGATE"
+    value: "true"
+  - name: "NRIA_IS_FORWARD_ONLY"
+    value: "true"
+  - name: "NEW_RELIC_DISTRIBUTED_TRACING_ENABLED"
+    value: "true"
+  - name: "NRIA_PASSTHROUGH_ENVIRONMENT"
+    value: "ECS_CONTAINER_METADATA_URI,ECS_CONTAINER_METADATA_URI_V4,FARGATE"
+  - name: "NEW_RELIC_HOST"
+    value: "gov-collector.newrelic.com"
+  - name: "NRIA_CUSTOM_ATTRIBUTES"
+    value: "{\"nrDeployMethod\":\"downloadPage\"}"
+  - name: "NEW_RELIC_APP_NAME"
+    value: "$SERVICE"
+  - name: "NRIA_OVERRIDE_HOST_ROOT"
+    value: ""
+  secrets:
+  - name: "NRIA_LICENSE_KEY"
+    valueFrom: "arn:aws:secretsmanager:$REGION:$ACCOUNT_ID:secret:monitoring/newrelic:api_key::"
+
+- name: api
+  image: "$IMAGE_ID"
+  portMappings:
+  - protocol: tcp
+    containerPort: 3000
+    hostPort: 3000
+  essential: true
+  environment:
+  - name: "PROJECT"
+    value: "$PROJECT"
+  - name: "API_VERSION"
+    value: "$IMAGE_TAG"
+  - name: "NEW_RELIC_LOG_FILE_NAME"
+    value: "STDOUT"
+  - name: "NEW_RELIC_DISTRIBUTED_TRACING_ENABLED"
+    value: "true"
+  - name: "NEW_RELIC_HOST"
+    value: "gov-collector.newrelic.com"
+  - name: "NEW_RELIC_LABELS"
+    value: "Project:$PROJECT;Environment:$ENV"
+  - name: "NEW_RELIC_APP_NAME"
+    value: "ccdi-$PROJECT-$ENV-api"
+  - name: "NEW_RELIC_LICENSE_KEY"
+    value: "$NEW_RELIC_LICENSE_KEY"
+  - name: "JAVA_OPTS"
+    value: "-javaagent:/usr/local/tomcat/newrelic/newrelic.jar"
+  - name: "tier"
+    value: "$ENV"
+  - name: "federation_apis"
+    value: "$FEDERATION_APIS"
+  - name: "federation_sources"
+    value: "$FEDERATION_SOURCES"
+  - name: "memgraph_uri"
+    value: "$MEMGRAPH_URI"  
+  - name: "memgraph_user"
+    value: "$MEMGRAPH_USER"        
+  - name: "memgraph_password"
+    value: "$MEMGRAPH_PASSWORD"   
+  - name: "memgraph_database"
+    value: "$MEMGRAPH_DATABASE"           
+  logConfiguration:
+    logDriver: awsfirelens
+    options:
+      Format: json_lines
+      Name: http
+      Port: "443"
+      URI: "/receiver/v1/http/$SUMO_COLLECTOR_TOKEN"
+      Retry_Limit: "2"
+      tls: "on"
+      tls.verify: "off"
+    secretOptions:
+      - name: "Host"
+        valueFrom: "arn:aws:secretsmanager:us-east-1:$ACCOUNT_ID:secret:ccdi-$ENV-federation-secrets:sumo_collector_endpoint::"

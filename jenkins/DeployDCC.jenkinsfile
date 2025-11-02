@@ -1,0 +1,233 @@
+@Library('datacommons-jenkins-shared-library@v1.1') _
+
+pipeline {
+	agent {
+		node {
+			label 'federation-deploy-agent'
+		}
+	}
+
+	parameters {
+
+        string(
+            defaultValue: '',
+            description: 'The Image to Deploy',
+            name: 'ImageTag')
+
+        extendedChoice(
+            name: 'Environment',
+            defaultValue: 'dev',
+            description: 'Choose the environment to deploy to',
+            type: 'PT_SINGLE_SELECT',
+            value: 'dev,qa,stage,prod')
+
+  }
+
+  options {
+
+	timestamps()
+
+  }
+
+  environment {
+
+	PROGRAM      = "ccdi"
+	PROJECT      = "federation"
+	APP          = "dcc"
+	SLACK_SECRET = "federation_slack_url"
+	REGION       = "us-east-1"
+	ECR_REPO     = "ccdi-federation-dcc"
+	DEPLOY_REPO  = "ccdi-federation-api-deployments"
+	IMAGE_TAG    = "${params.ImageTag}"
+	ENV          = "${params.Environment}"
+	CLUSTER      = "${env.PROGRAM}-${env.ENV}-${env.PROJECT}-ecs"
+	SERVICE      = "${env.PROGRAM}-${env.ENV}-${env.PROJECT}-${env.APP}"
+
+  }
+
+  stages{
+
+  	stage('checkout'){
+
+  		steps {
+
+  		checkout([$class: 'GitSCM',
+			branches: [[name: '*/main']],
+			// branches: [[name: '*/deploy_test']],
+			extensions: [[$class: 'SubmoduleOption', 
+			recursiveSubmodules: true],
+			[$class: 'RelativeTargetDirectory',
+			relativeTargetDir: 'ccdi-federation-api-deployments']],
+			userRemoteConfigs:
+			[[url: "https://github.com/CBIIT/${env.DEPLOY_REPO}"]]])
+
+        }
+
+  	}
+
+    stage('Set Environment Variables'){
+
+ 		steps {
+
+ 			script {
+
+			    // set sumo vars for logging
+				env.SUMO_COLLECTOR_ENDPOINT = sh(label: 'Get Sumo Endpoint', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.sumo_collector_endpoint'").trim()
+				env.SUMO_COLLECTOR_TOKEN = sh(label: 'Get Sumo Token', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.sumo_logic_api_key'").trim()
+                env.NEW_RELIC_LICENSE_KEY = sh(label: 'Get New_Relic_license Token', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id monitoring/newrelic --query SecretString --output text | jq -r '.api_key'").trim()
+				// set neo4j vars
+				// env.NEO4J_HOST = sh(label: 'Get Neo4j Host', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.neo4j_ip'").trim()
+
+				// set ECR account number
+				env.ECR_ACCOUNT = sh(label: 'Get ECR account', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.ecr_account_id'").trim()
+
+				// set repo URL
+				env.REPO_URL = "${ECR_ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO}"
+                env.FEDERATION_APIS = sh(label: 'Get federation_apis', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.federation_apis'").trim()
+				env.FEDERATION_SOURCES = sh(label: 'Get federation_sources', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.federation_sources'").trim()
+				env.MEMGRAPH_URI = sh(label: 'Get cpi client id', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id cpi --query SecretString --output text | jq -r '.memgraph_uri'").trim()
+				env.MEMGRAPH_USER = sh(label: 'Get cpi client secret', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id cpi --query SecretString --output text | jq -r '.memgraph_user'").trim()
+				env.MEMGRAPH_PASSWORD = sh(label: 'Get cpi client secret', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id cpi --query SecretString --output text | jq -r '.memgraph_password'").trim()
+				env.MEMGRAPH_DATABASE = sh(label: 'Get cpi client secret', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id cpi --query SecretString --output text | jq -r '.memgraph_database'").trim()                
+				// set template file name
+				// env.TEMPLATE_FILE="ccdi-federation-api-deployments/aws/${APP}_task.json"
+				// env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task_cloudwatch.json"
+				// env.TEMPLATE_FILE="ccdi-federation-api-deployments/aws/${APP}_task.yml"
+
+			}
+
+ 		}
+
+  	}
+
+	stage('Add Production Tag'){
+ 		when {
+	        expression {
+                ENV == 'prod'
+            }
+        }
+		steps {
+ 			script {
+			    sh label: 'Docker-Tag', script: '''#!/bin/bash
+				# Tag image as production if deploying to prod tier
+				echo "Tagging Image as Production: $ECR_REPO:$IMAGE_TAG"
+				
+				# login and get manifest
+				docker login -u AWS -p $(aws ecr get-login-password --region $REGION) $REPO_URL
+				docker pull $REPO_URL:$IMAGE_TAG
+				docker tag $REPO_URL:$IMAGE_TAG $REPO_URL:prod-$IMAGE_TAG
+				docker push $REPO_URL:prod-$IMAGE_TAG
+				'''
+                IMAGE_TAG = "prod-$IMAGE_TAG"
+                echo "updated image tag: $IMAGE_TAG"
+			}
+ 		}
+  	}
+
+  	stage('Update Task Definition'){
+
+ 		steps {
+
+			script {
+
+			    sh label: 'Task-Definition-Update', script: '''#!/bin/bash
+
+				# create new revision for $PROJECT-$APP Task Definition
+				echo "Updating Task Defintion to Use: $ECR_REPO:$IMAGE_TAG"
+				export ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
+				export IMAGE_ID="$REPO_URL:$IMAGE_TAG"
+
+				TEMPLATE_PATH="ccdi-federation-api-deployments/aws"
+
+				# DEBUG
+				echo "$ACCOUNT_ID"
+				echo "$IMAGE_ID"
+				echo $SUMO_COLLECTOR_ENDPOINT
+				echo $SUMO_COLLECTOR_TOKEN
+				echo "$TEMPLATE_PATH"
+				echo "NEW_RELIC_LICENSE_KEY"
+				cat $TEMPLATE_PATH/${APP}_task.yml
+				
+				# Update and register task definition
+				envsubst < $TEMPLATE_PATH/${APP}_task.yml > $TEMPLATE_PATH/${APP}_task-deploy.yml
+
+				# DEBUG
+				echo "$TEMPLATE_PATH"
+				cat $TEMPLATE_PATH/${APP}_task-deploy.yml
+
+				#aws ecs register-task-definition --cli-input-yaml file://$TEMPLATE_FILE
+
+				docker run -v ./$TEMPLATE_PATH:/aws/ --rm --name aws-cli amazon/aws-cli ecs register-task-definition --cli-input-yaml file:///aws/${APP}_task-deploy.yml
+
+				'''
+
+
+			}
+
+ 		}
+
+  	}
+
+    stage('Update Service'){
+
+ 		steps {
+
+ 			script {
+
+			    sh label: 'Service-Update', script: '''#!/bin/bash
+
+				# Redeploy Service Using The Latest Task Definition
+				echo "Updating Service: $SERVICE"
+
+				TASK_REVISION=$(aws ecs describe-task-definition --task-definition $SERVICE | egrep "revision" | awk '{print $2}' | sed 's/,//')
+				aws ecs update-service --cluster $CLUSTER --region $REGION --service $SERVICE --task-definition $SERVICE:$TASK_REVISION --desired-count 1
+
+				'''
+
+			}
+
+ 		}
+
+  	}
+
+	stage('verify deployment'){
+
+		steps {
+
+ 			script {
+
+			    sh label: 'Verify-Deploy', script: '''#!/bin/bash
+
+                # wait untiil the service is stable
+				aws ecs wait services-stable --cluster $CLUSTER --region $REGION --service $SERVICE
+
+				'''
+
+			}
+
+ 		}
+
+  	}
+
+  }
+
+  post {
+
+    // always {
+
+    //     notify(
+    //         secretPath: "notification/slack",
+    //         secretName: "${env.SLACK_SECRET}"
+    //     ) 
+
+    // }
+
+    cleanup {
+
+        cleanWs()
+
+    }
+
+  }
+
+}
