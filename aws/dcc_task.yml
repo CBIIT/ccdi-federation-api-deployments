@@ -1,4 +1,4 @@
-family: "ccdi-$ENV-federation-api"
+family: "ccdi-$ENV-federation-dcc"
 networkMode: awsvpc
 cpu: "2048"
 memory: "4096"
