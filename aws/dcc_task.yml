@@ -44,8 +44,8 @@ containerDefinitions:
   image: "$IMAGE_ID"
   portMappings:
   - protocol: tcp
-    containerPort: 3000
-    hostPort: 3000
+    containerPort: 8000
+    hostPort: 8000
   essential: true
   environment:
   - name: "PROJECT"
