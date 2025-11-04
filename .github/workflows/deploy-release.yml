@@ -21,30 +21,15 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     steps:
-    - name: Check out code
-      uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5     # v2.7.0
-
-    - name: Set up Python 3.9
-      uses: actions/setup-python@b64ffcaf5b410884ad320a9cfac8866006a109aa     # v4.8.0
-      with:
-        python-version: "3.9"
-
     - name: Set up Node
       id: node-setup
       uses: actions/setup-node@1a4442cacd436585916779262731d5b162bc6ec7     # v3.8.2
       with:
         node-version: "20"
  
-    # - name: Install CDK
-    #   id: install-cdk
-    #   run: |
-    #     npm install -g aws-cdk@2.155.0
-
-    - name: Install Python dependencies and CDK
+    - name: Install CDK
+      id: install-cdk
       run: |
-        python -m pip install --upgrade pip
-        # install stack Python dependencies
-        cd aws_cdk/memgraph && pip3 install --ignore-installed --break-system-packages -r requirements.txt
         npm install -g aws-cdk@2.155.0
 
     - name: AWS OIDC Authentication
@@ -61,19 +46,12 @@ jobs:
         MEMGRAPH_IMAGE:
       shell: bash
       run: |
-        vars=$(python3 scripts/readYML.py versions.yaml)
-        for v in $vars; do command="export $v"; eval $command;  done
-
-        MEMGRAPH_IMAGE=$IMAGE_MEMGRAPH
-
-        echo "MEMGRAPH_IMAGE=$MEMGRAPH_IMAGE"
-
-        echo "MEMGRAPH_IMAGE=$MEMGRAPH_IMAGE" >> $GITHUB_ENV
-
         ver_string=${{ inputs.release_number }}
         app_version="${ver_string%.*}"
 
-        aws s3api get-object --bucket federation-cdk-config --key $MEMGRAPH_IMAGE/${{ inputs.environment }}.${{ inputs.release_number }}.zip ./${{ inputs.environment }}.${{ inputs.release_number }}.zip
+        echo "app version: $app_version"
+
+        aws s3api get-object --bucket federation-cdk-config --key $app_version/${{ inputs.environment }}.${{ inputs.release_number }}.zip ./${{ inputs.environment }}.${{ inputs.release_number }}.zip
         unzip ./${{ inputs.environment }}.${{ inputs.release_number }}.zip
         echo "Retrieved CDK App: ${{ inputs.environment }}.${{ inputs.release_number }}"
 
@@ -93,25 +71,15 @@ jobs:
     if: success() # Only proceed if diff job succeeds
 
     steps:
-    - name: Check out code
-      uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5     # v2.7.0
-
-    - name: Set up Python 3.9
-      uses: actions/setup-python@b64ffcaf5b410884ad320a9cfac8866006a109aa     # v4.8.0
-      with:
-        python-version: "3.9"
-
     - name: Set up Node
       id: node-setup
       uses: actions/setup-node@1a4442cacd436585916779262731d5b162bc6ec7     # v3.8.2
       with:
         node-version: "20"
-
-    - name: Install Python dependencies and CDK
+  
+    - name: Install CDK
+      id: install-cdk
       run: |
-        python -m pip install --upgrade pip
-        # install stack Python dependencies
-        cd aws_cdk/memgraph && pip3 install --ignore-installed --break-system-packages -r requirements.txt
         npm install -g aws-cdk@2.155.0
 
     - name: AWS OIDC Authentication
@@ -128,19 +96,10 @@ jobs:
         MEMGRAPH_IMAGE:
       shell: bash
       run: |
-        vars=$(python3 scripts/readYML.py versions.yaml)
-        for v in $vars; do command="export $v"; eval $command;  done
-
-        MEMGRAPH_IMAGE=$IMAGE_MEMGRAPH
-
-        echo "MEMGRAPH_IMAGE=$MEMGRAPH_IMAGE"
-
-        echo "MEMGRAPH_IMAGE=$MEMGRAPH_IMAGE" >> $GITHUB_ENV
-
         ver_string=${{ inputs.release_number }}
         app_version="${ver_string%.*}"
 
-        aws s3api get-object --bucket federation-cdk-config --key $MEMGRAPH_IMAGE/${{ inputs.environment }}.${{ inputs.release_number }}.zip ./${{ inputs.environment }}.${{ inputs.release_number }}.zip
+        aws s3api get-object --bucket federation-cdk-config --key $app_version/${{ inputs.environment }}.${{ inputs.release_number }}.zip ./${{ inputs.environment }}.${{ inputs.release_number }}.zip
         unzip ./${{ inputs.environment }}.${{ inputs.release_number }}.zip
         echo "Retrieved CDK App: ${{ inputs.release_number }}"
 
