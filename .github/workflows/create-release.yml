@@ -46,11 +46,6 @@ jobs:
         MEMGRAPH_IMAGE:
       shell: bash
       run: |
-        ver_string=${{ inputs.release_number }}
-        app_version="${ver_string%.*}"
-
-        echo "app version: $app_version"
-        
         vars=$(python3 scripts/readYML.py versions.yaml)
         for v in $vars; do command="export $v"; eval $command;  done
 
