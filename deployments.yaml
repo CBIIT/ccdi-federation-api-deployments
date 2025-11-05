@@ -13,6 +13,6 @@ services:
     image: v1.2.2.101
     buildNumber: '101'
   dcc:
-    version: cz_test.11
-    image: cz_test.11
-    buildNumber: '11'
+    version: cz_test.12
+    image: cz_test.12
+    buildNumber: '12'
