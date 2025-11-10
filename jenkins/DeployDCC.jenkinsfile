@@ -85,10 +85,13 @@ pipeline {
 				env.REPO_URL = "${ECR_ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO}"
                 env.FEDERATION_APIS = sh(label: 'Get federation_apis', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.federation_apis'").trim()
 				env.FEDERATION_SOURCES = sh(label: 'Get federation_sources', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.federation_sources'").trim()
-				env.MEMGRAPH_URI = sh(label: 'Get cpi client id', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.memgraph_uri'").trim()
-				env.MEMGRAPH_USER = sh(label: 'Get cpi client secret', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.memgraph_user'").trim()
-				env.MEMGRAPH_PASSWORD = sh(label: 'Get cpi client secret', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.memgraph_password'").trim()
-				env.MEMGRAPH_DATABASE = sh(label: 'Get cpi client secret', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.memgraph_database'").trim()                
+				env.MEMGRAPH_URI = sh(label: 'Get memgraph uri secret', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.memgraph_uri'").trim()
+				env.MEMGRAPH_USER = sh(label: 'Get memgraph user secret', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.memgraph_user'").trim()
+				env.MEMGRAPH_PASSWORD = sh(label: 'Get memgraph password secret', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.memgraph_password'").trim()
+				env.MEMGRAPH_DATABASE = sh(label: 'Get memgraph database secret', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.memgraph_database'").trim()                
+				DCC_VERSION = "${params.ImageTag}"
+				//env.DCC_VERSION = sh(label: 'Get version secret ', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.dcc_version'").trim()                
+				
 				// set template file name
 				// env.TEMPLATE_FILE="ccdi-federation-api-deployments/aws/${APP}_task.json"
 				// env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task_cloudwatch.json"

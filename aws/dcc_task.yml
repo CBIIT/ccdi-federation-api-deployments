@@ -79,7 +79,9 @@ containerDefinitions:
   - name: "memgraph_password"
     value: "$MEMGRAPH_PASSWORD"   
   - name: "memgraph_database"
-    value: "$MEMGRAPH_DATABASE"           
+    value: "$MEMGRAPH_DATABASE" 
+  - name: "dcc_version"
+    value: "$DCC_VERSION"             
   logConfiguration:
     logDriver: awsfirelens
     options:
