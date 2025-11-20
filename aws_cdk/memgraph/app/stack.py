@@ -21,8 +21,13 @@ class Stack(Stack):
         config = ConfigParser()
         config.read('config.ini')
 
-        namingPrefix = "{}-{}".format(config['main']['resource_prefix'], config['main']['tier'])
+        self.namingPrefix = "{}-{}".format(config['main']['resource_prefix'], config['main']['tier'])
         
+        if config.has_option('main', 'subdomain'):
+            self.app_url = "https://{}.{}".format(config['main']['subdomain'], config['main']['domain'])
+        else:
+            self.app_url = "https://{}".format(config['main']['domain'])
+
         # Import VPC
         vpc = ec2.Vpc.from_lookup(self, "VPC",
             vpc_id = config['main']['vpc_id']
@@ -245,3 +250,155 @@ class Stack(Stack):
         )
         listener_7444.add_target_groups("target7444", nlbTargetGroup7444)
         nlbTargetGroup7444.add_target(ECSService)
+
+        # --- Application Load Balancer ---
+        # Public subnets (security rule) + Access logs to bucket/prefix from config
+        if config.getboolean('alb', 'internet_facing'):
+            subnets = ec2.SubnetSelection(
+                subnets=vpc.select_subnets(one_per_az=True, subnet_type=ec2.SubnetType.PUBLIC).subnets
+            )
+        else:
+            subnets = ec2.SubnetSelection(
+                subnets=vpc.select_subnets(one_per_az=True, subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS).subnets
+            )
+        
+        self.ALB = elbv2.ApplicationLoadBalancer(
+            self,
+            "alb",
+            vpc=self.vpc,
+            internet_facing=config.getboolean("alb", "internet_facing", fallback=True),
+            vpc_subnets=subnets
+        )
+        self.ALB.add_redirect(
+            source_protocol=elbv2.ApplicationProtocol.HTTP,
+            source_port=80,
+            target_protocol=elbv2.ApplicationProtocol.HTTPS,
+            target_port=443
+        )
+
+        client = boto3.client('acm')
+        response = client.list_certificates(CertificateStatuses=['ISSUED'])
+
+        for cert in response["CertificateSummaryList"]:
+            if ('*.{}'.format(config['main']['domain']) in cert.values()):
+                certARN = cert['CertificateArn']
+
+        alb_cert = cfm.Certificate.from_certificate_arn(self, "alb-cert",
+            certificate_arn=certARN)
+        
+        self.listener = self.ALB.add_listener("PublicListener",
+            certificates=[alb_cert],
+            port=443
+        )
+
+        self.listener.add_action("ECS-Content-Not-Found",
+            action=elbv2.ListenerAction.fixed_response(200,
+                message_body="The requested resource is not available")
+        )
+
+        ### ALB Access log
+        log_bucket = s3.Bucket.from_bucket_arn(self, "AlbLogBucket", config["alb"]["log_bucket_arn"])
+        alb.log_access_logs(
+            log_bucket,
+            prefix=f"{config['main']['program']}/{config['main']['tier']}/{config['main']['project']}/alb-access-logs",
+        )  # prefix as required
+
+        # REST API Task Definition and Container
+        federationRestApiTaskDefinition = ecs.FargateTaskDefinition(self,
+            "federationRestApiTaskDef",
+            family="{}-federation-rest-api".format(namingPrefix),
+            cpu=config.getint('federation_rest_api', 'cpu'),
+            memory_limit_mib=config.getint('federation_rest_api', 'memory')
+        )
+
+        # Add required permissions to execution role
+        federationRestApiTaskDefinition.add_to_execution_role_policy(
+            iam.PolicyStatement(
+                effect=iam.Effect.ALLOW,
+                actions=[
+                    "ecr:GetAuthorizationToken",
+                    "ecr:BatchCheckLayerAvailability",
+                    "ecr:GetDownloadUrlForLayer",
+                    "ecr:BatchGetImage",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                ],
+                resources=["*"]
+            )
+        )
+
+        # use repository ARN to get IRepository
+        ecr_repo = ecr.Repository.from_repository_arn(self, "federationRestApi_repo", repository_arn=config['federation_rest_api']['repo'])
+
+        # Federation REST API Service Security Group
+        FederationRestApiServiceSG = ec2.SecurityGroup(self, "FederationRestApiServiceSecurityGroup", 
+            vpc=vpc, 
+            allow_all_outbound=True, 
+            description="Security group for Federation REST API ECS service"
+        )
+
+        FederationRestApiServiceSG.add_ingress_rule(
+            peer=ec2.Peer.any_ipv4(),
+            connection=ec2.Port.tcp(config.getint('federation_rest_api', 'port')),
+            description="Allow Federation REST API traffic"
+        )
+
+        # create ContainerImage correctly from ECR repository
+        federationRestApi_image = ecs.ContainerImage.from_ecr_repository(ecr_repo, tag=config['federation_rest_api']['image'])
+
+        federationRestApiContainer = federationRestApiTaskDefinition.add_container("federationRestApi",
+            image=federationRestApi_image,
+            cpu=config.getint('federation_rest_api', 'cpu'),
+            memory_limit_mib=config.getint('federation_rest_api', 'memory'),
+            port_mappings=[ecs.PortMapping(container_port=config.getint('federation_rest_api', 'port'))],
+            environment={
+                "memgraph_uri": "bolt://" + ALB.load_balancer_dns_name + ":7687",
+                "memgraph_database": "memgraph"
+            },
+            secrets={
+                "memgraph_user": ecs.Secret.from_secrets_manager(secret, 'db_user'),
+                "memgraph_password": ecs.Secret.from_secrets_manager(secret, 'db_pass'),
+                "federation_apis": ecs.Secret.from_secrets_manager(secret, 'federation_apis'),
+                "federation_sources": ecs.Secret.from_secrets_manager(secret, 'federation_sources')
+            },
+            logging=ecs.LogDrivers.aws_logs(
+                stream_prefix="{}-federation-rest-api".format(namingPrefix)
+            )
+        )
+
+        federationRestApiService = ecs.FargateService(self, "federationRestApiService",
+            cluster=ECSCluster,
+            service_name="{}-federation-rest-api".format(namingPrefix),
+            task_definition=federationRestApiTaskDefinition,
+            security_groups=[FederationRestApiServiceSG],
+            enable_execute_command=True,
+            min_healthy_percent=0,
+            max_healthy_percent=100,
+            circuit_breaker=ecs.DeploymentCircuitBreaker(
+                enable=True,
+                rollback=True
+            )
+        )
+
+        # Add federation REST API listener to existing NLB instead of creating new NLB
+        federationRestApiListener = ALB.add_listener("FederationRestApiListener", 
+            port=config.getint('federation_rest_api', 'port')
+        )
+
+        federationRestApiTargetGroup = elbv2.NetworkTargetGroup(self,
+            id="federationRestApiTargetGroup",
+            target_type=elbv2.TargetType.IP,
+            protocol=elbv2.Protocol.TCP,
+            port=config.getint('federation_rest_api', 'port'),
+            vpc=vpc
+        )
+
+        federationRestApiListener.add_target_groups("federationRestApiTarget", federationRestApiTargetGroup)
+        federationRestApiTargetGroup.add_target(federationRestApiService)
+
+        # Add ingress rule to LBSecurityGroup for Federation REST API port
+        LBSecurityGroup.add_ingress_rule(
+            peer=ec2.Peer.any_ipv4(),
+            connection=ec2.Port.tcp(config.getint('federation_rest_api', 'port')),
+            description="Federation REST API"
+        )
