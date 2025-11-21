@@ -405,7 +405,7 @@ class Stack(Stack):
             vpc=vpc
         )
 
-        federationDCCRestApiListener.add_target_groups("federationDCCRestApiTarget", federationDCCRestApiTargetGroup)
+        federationDCCRestApiListener.add_target_groups(federationDCCRestApiTargetGroup)
         federationDCCRestApiTargetGroup.add_target(federationDCCRestApiService)
 
         # Add ingress rule to LBSecurityGroup for Federation REST API port
