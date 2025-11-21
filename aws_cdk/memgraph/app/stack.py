@@ -304,11 +304,11 @@ class Stack(Stack):
         )  # prefix as required
 
         # REST API Task Definition and Container
-        federationRestApiTaskDefinition = ecs.FargateTaskDefinition(self,
-            "federationRestApiTaskDef",
-            family="{}-federation-rest-api".format(namingPrefix),
-            cpu=config.getint('federation_rest_api', 'cpu'),
-            memory_limit_mib=config.getint('federation_rest_api', 'memory')
+        federationDCCRestApiTaskDefinition = ecs.FargateTaskDefinition(self,
+            "federationDCCRestApiTaskDef",
+            family="{}-federation-dcc-rest-api".format(namingPrefix),
+            cpu=config.getint('federation_dcc_rest_api', 'cpu'),
+            memory_limit_mib=config.getint('federation_dcc_rest_api', 'memory')
         )
 
         # Add required permissions to execution role
@@ -328,29 +328,29 @@ class Stack(Stack):
         )
 
         # use repository ARN to get IRepository
-        ecr_repo = ecr.Repository.from_repository_arn(self, "federationRestApi_repo", repository_arn=config['federation_rest_api']['repo'])
+        ecr_repo = ecr.Repository.from_repository_arn(self, "federationDCCRestApi_repo", repository_arn=config['federation_dcc_rest_api']['repo'])
 
         # Federation REST API Service Security Group
-        FederationRestApiServiceSG = ec2.SecurityGroup(self, "FederationRestApiServiceSecurityGroup", 
+        FederationDCCRestApiServiceSG = ec2.SecurityGroup(self, "FederationDCCRestApiServiceSecurityGroup", 
             vpc=vpc, 
             allow_all_outbound=True, 
-            description="Security group for Federation REST API ECS service"
+            description="Security group for Federation DCC REST API ECS service"
         )
 
-        FederationRestApiServiceSG.add_ingress_rule(
+        FederationDCCRestApiServiceSG.add_ingress_rule(
             peer=ec2.Peer.any_ipv4(),
-            connection=ec2.Port.tcp(config.getint('federation_rest_api', 'port')),
-            description="Allow Federation REST API traffic"
+            connection=ec2.Port.tcp(config.getint('federation_dcc_rest_api', 'port')),
+            description="Allow Federation DCC REST API traffic"
         )
 
         # create ContainerImage correctly from ECR repository
-        federationRestApi_image = ecs.ContainerImage.from_ecr_repository(ecr_repo, tag=config['federation_rest_api']['image'])
+        federationDCCRestApi_image = ecs.ContainerImage.from_ecr_repository(ecr_repo, tag=config['federation_dcc_rest_api']['image'])
 
-        federationRestApiContainer = federationRestApiTaskDefinition.add_container("federationRestApi",
-            image=federationRestApi_image,
-            cpu=config.getint('federation_rest_api', 'cpu'),
-            memory_limit_mib=config.getint('federation_rest_api', 'memory'),
-            port_mappings=[ecs.PortMapping(container_port=config.getint('federation_rest_api', 'port'))],
+        federationDCCRestApiContainer = federationDCCRestApiTaskDefinition.add_container("federationDCCRestApi",
+            image=federationDCCRestApi_image,
+            cpu=config.getint('federation_dcc_rest_api', 'cpu'),
+            memory_limit_mib=config.getint('federation_dcc_rest_api', 'memory'),
+            port_mappings=[ecs.PortMapping(container_port=config.getint('federation_dcc_rest_api', 'port'))],
             environment={
                 "memgraph_uri": "bolt://" + ALB.load_balancer_dns_name + ":7687",
                 "memgraph_database": "memgraph"
@@ -362,15 +362,15 @@ class Stack(Stack):
                 "federation_sources": ecs.Secret.from_secrets_manager(secret, 'federation_sources')
             },
             logging=ecs.LogDrivers.aws_logs(
-                stream_prefix="{}-federation-rest-api".format(namingPrefix)
+                stream_prefix="{}-federation-dcc-rest-api".format(namingPrefix)
             )
         )
 
-        federationRestApiService = ecs.FargateService(self, "federationRestApiService",
+        federationDCCRestApiService = ecs.FargateService(self, "federationDCCRestApiService",
             cluster=ECSCluster,
-            service_name="{}-federation-rest-api".format(namingPrefix),
-            task_definition=federationRestApiTaskDefinition,
-            security_groups=[FederationRestApiServiceSG],
+            service_name="{}-federation-dcc-rest-api".format(namingPrefix),
+            task_definition=federationDCCRestApiTaskDefinition,
+            security_groups=[FederationDCCRestApiServiceSG],
             enable_execute_command=True,
             min_healthy_percent=0,
             max_healthy_percent=100,
@@ -381,24 +381,24 @@ class Stack(Stack):
         )
 
         # Add federation REST API listener to existing NLB instead of creating new NLB
-        federationRestApiListener = ALB.add_listener("FederationRestApiListener", 
-            port=config.getint('federation_rest_api', 'port')
+        federationDCCRestApiListener = ALB.add_listener("FederationDCCRestApiListener", 
+            port=config.getint('federation_dcc_rest_api', 'port')
         )
 
-        federationRestApiTargetGroup = elbv2.NetworkTargetGroup(self,
-            id="federationRestApiTargetGroup",
+        federationDCCRestApiTargetGroup = elbv2.NetworkTargetGroup(self,
+            id="federationDCCRestApiTargetGroup",
             target_type=elbv2.TargetType.IP,
             protocol=elbv2.Protocol.TCP,
-            port=config.getint('federation_rest_api', 'port'),
+            port=config.getint('federation_dcc_rest_api', 'port'),
             vpc=vpc
         )
 
-        federationRestApiListener.add_target_groups("federationRestApiTarget", federationRestApiTargetGroup)
-        federationRestApiTargetGroup.add_target(federationRestApiService)
+        federationDCCRestApiListener.add_target_groups("federationDCCRestApiTarget", federationDCCRestApiTargetGroup)
+        federationDCCRestApiTargetGroup.add_target(federationDCCRestApiService)
 
         # Add ingress rule to LBSecurityGroup for Federation REST API port
         LBSecurityGroup.add_ingress_rule(
             peer=ec2.Peer.any_ipv4(),
-            connection=ec2.Port.tcp(config.getint('federation_rest_api', 'port')),
-            description="Federation REST API"
+            connection=ec2.Port.tcp(config.getint('federation_dcc_rest_api', 'port')),
+            description="Federation DCC REST API"
         )

@@ -3,3 +3,5 @@ project: bento
 services:
   memgraph:
     version: '3.2'
+  federation_dcc_rest_api:
+    version: 'dev.28'
