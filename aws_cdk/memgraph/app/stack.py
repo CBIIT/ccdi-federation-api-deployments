@@ -303,11 +303,13 @@ class Stack(Stack):
         )
 
         ### ALB Access log
-        log_bucket = s3.Bucket.from_bucket_arn(self, "AlbLogBucket", config["alb"]["log_bucket_arn"])
-        alb.log_access_logs(
-            log_bucket,
-            prefix=f"{config['main']['program']}/{config['main']['tier']}/{config['main']['project']}/alb-access-logs",
-        )  # prefix as required
+        log_bucket = s3.Bucket.from_bucket_name(self, "AlbAccessLogsBucket", config['main']['alb_log_bucket_name'])
+        log_prefix = f"{config['main']['program']}/{config['main']['tier']}/{config['main']['project']}/alb-access-logs"
+
+        self.ALB.log_access_logs(
+            bucket=log_bucket,
+            prefix=log_prefix
+        )
 
         # REST API Task Definition and Container
         federationDCCRestApiTaskDefinition = ecs.FargateTaskDefinition(self,
