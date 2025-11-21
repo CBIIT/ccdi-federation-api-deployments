@@ -1,12 +1,18 @@
+import boto3
 import os
 from configparser import ConfigParser
 from constructs import Construct
 
+import aws_cdk as cdk
 from aws_cdk import Stack
 from aws_cdk import RemovalPolicy
 from aws_cdk import SecretValue
 from aws_cdk import aws_elasticloadbalancingv2 as elbv2
 from aws_cdk import aws_ec2 as ec2
+from aws_cdk import aws_certificatemanager as cfm
+from aws_cdk import aws_iam as iam
+from aws_cdk import aws_s3 as s3
+from aws_cdk import aws_ecr as ecr
 from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_efs as efs
 from aws_cdk import aws_kms as kms
@@ -21,7 +27,7 @@ class Stack(Stack):
         config = ConfigParser()
         config.read('config.ini')
 
-        self.namingPrefix = "{}-{}".format(config['main']['resource_prefix'], config['main']['tier'])
+        namingPrefix = "{}-{}".format(config['main']['resource_prefix'], config['main']['tier'])
         
         if config.has_option('main', 'subdomain'):
             self.app_url = "https://{}.{}".format(config['main']['subdomain'], config['main']['domain'])
@@ -262,14 +268,14 @@ class Stack(Stack):
                 subnets=vpc.select_subnets(one_per_az=True, subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS).subnets
             )
         
-        self.ALB = elbv2.ApplicationLoadBalancer(
+        ALB = elbv2.ApplicationLoadBalancer(
             self,
             "alb",
-            vpc=self.vpc,
+            vpc=vpc,
             internet_facing=config.getboolean("alb", "internet_facing", fallback=True),
             vpc_subnets=subnets
         )
-        self.ALB.add_redirect(
+        ALB.add_redirect(
             source_protocol=elbv2.ApplicationProtocol.HTTP,
             source_port=80,
             target_protocol=elbv2.ApplicationProtocol.HTTPS,
@@ -286,7 +292,7 @@ class Stack(Stack):
         alb_cert = cfm.Certificate.from_certificate_arn(self, "alb-cert",
             certificate_arn=certARN)
         
-        self.listener = self.ALB.add_listener("PublicListener",
+        self.listener = ALB.add_listener("PublicListener",
             certificates=[alb_cert],
             port=443
         )
@@ -297,11 +303,13 @@ class Stack(Stack):
         )
 
         ### ALB Access log
-        log_bucket = s3.Bucket.from_bucket_arn(self, "AlbLogBucket", config["alb"]["log_bucket_arn"])
-        alb.log_access_logs(
-            log_bucket,
-            prefix=f"{config['main']['program']}/{config['main']['tier']}/{config['main']['project']}/alb-access-logs",
-        )  # prefix as required
+        log_bucket = s3.Bucket.from_bucket_name(self, "AlbAccessLogsBucket", config['main']['alb_log_bucket_name'])
+        log_prefix = f"{config['main']['program']}/{config['main']['tier']}/{config['main']['project']}/alb-access-logs"
+
+        ALB.log_access_logs(
+            bucket=log_bucket,
+            prefix=log_prefix
+        )
 
         # REST API Task Definition and Container
         federationDCCRestApiTaskDefinition = ecs.FargateTaskDefinition(self,
@@ -312,7 +320,7 @@ class Stack(Stack):
         )
 
         # Add required permissions to execution role
-        federationRestApiTaskDefinition.add_to_execution_role_policy(
+        federationDCCRestApiTaskDefinition.add_to_execution_role_policy(
             iam.PolicyStatement(
                 effect=iam.Effect.ALLOW,
                 actions=[
@@ -379,21 +387,29 @@ class Stack(Stack):
                 rollback=True
             )
         )
+        # Allow port from ALB to ECS service
+        federationDCCRestApiService.connections.security_groups[0].add_ingress_rule(
+            LBSecurityGroup,
+            ec2.Port.tcp(config.getint('federation_dcc_rest_api', 'port'))
+        )
 
-        # Add federation REST API listener to existing NLB instead of creating new NLB
         federationDCCRestApiListener = ALB.add_listener("FederationDCCRestApiListener", 
             port=config.getint('federation_dcc_rest_api', 'port')
         )
 
-        federationDCCRestApiTargetGroup = elbv2.NetworkTargetGroup(self,
+        federationDCCRestApiTargetGroup = elbv2.ApplicationTargetGroup(self,
             id="federationDCCRestApiTargetGroup",
             target_type=elbv2.TargetType.IP,
-            protocol=elbv2.Protocol.TCP,
+            protocol=elbv2.ApplicationProtocol.HTTP,
             port=config.getint('federation_dcc_rest_api', 'port'),
             vpc=vpc
         )
 
-        federationDCCRestApiListener.add_target_groups("federationDCCRestApiTarget", federationDCCRestApiTargetGroup)
+        # add_target_groups expects the target_groups argument as a keyword-only list
+        federationDCCRestApiListener.add_target_groups(
+            "federationDCCRestApiTarget",
+            target_groups=[federationDCCRestApiTargetGroup]
+        )
         federationDCCRestApiTargetGroup.add_target(federationDCCRestApiService)
 
         # Add ingress rule to LBSecurityGroup for Federation REST API port
