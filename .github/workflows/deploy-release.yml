@@ -43,7 +43,7 @@ jobs:
     - name: Get Artifacts From S3
       id: get-artifacts-diff
       env:
-        MEMGRAPH_IMAGE:
+        FEDERATION_DCC_REST_API_IMAGE:
       shell: bash
       run: |
         ver_string=${{ inputs.release_number }}
@@ -93,7 +93,7 @@ jobs:
     - name: Get Artifacts From S3
       id: get-artifacts
       env:
-        MEMGRAPH_IMAGE:
+        FEDERATION_DCC_REST_API_IMAGE:
       shell: bash
       run: |
         ver_string=${{ inputs.release_number }}

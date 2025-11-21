@@ -44,16 +44,19 @@ jobs:
       id: get-config
       env:
         MEMGRAPH_IMAGE:
+        FEDERATION_DCC_REST_API_IMAGE:
       shell: bash
       run: |
         vars=$(python3 scripts/readYML.py versions.yaml)
         for v in $vars; do command="export $v"; eval $command;  done
 
         MEMGRAPH_IMAGE=$IMAGE_MEMGRAPH
-
+        FEDERATION_DCC_REST_API_IMAGE=$IMAGE_FEDERATION_DCC_REST_API
         echo "MEMGRAPH_IMAGE=$MEMGRAPH_IMAGE"
+        echo "FEDERATION_DCC_REST_API_IMAGE=$FEDERATION_DCC_REST_API_IMAGE"
 
         echo "MEMGRAPH_IMAGE=$MEMGRAPH_IMAGE" >> $GITHUB_ENV
+        echo "FEDERATION_DCC_REST_API_IMAGE=$FEDERATION_DCC_REST_API_IMAGE" >> $GITHUB_ENV
 
         cd aws_cdk/memgraph/
 
@@ -71,19 +74,19 @@ jobs:
       run: |
         # Get all tags for the repo and find the latest tag for the version being built
         git fetch --tags --force --quiet
-        tag=$(git tag -l ${{ env.MEMGRAPH_IMAGE }}* | sort -V | tail -1)
+        tag=$(git tag -l ${{ env.FEDERATION_DCC_REST_API_IMAGE }}* | sort -V | tail -1)
         if  [ ! -z "$tag" ];
         then
           # Increment the build number if a tag is found
           build_num=$(echo "${tag##*.}")
           build_num=$((build_num+1))
-          echo "VERSION_TAG=${{ env.MEMGRAPH_IMAGE }}.$build_num"
-          echo "VERSION_TAG=${{ env.MEMGRAPH_IMAGE }}.$build_num" >> $GITHUB_ENV
+          echo "VERSION_TAG=${{ env.FEDERATION_DCC_REST_API_IMAGE }}.$build_num"
+          echo "VERSION_TAG=${{ env.FEDERATION_DCC_REST_API_IMAGE }}.$build_num" >> $GITHUB_ENV
         else
           # If no tag is found create a new tag name
           build_num=1
-          echo "VERSION_TAG=${{ env.MEMGRAPH_IMAGE }}.$build_num"
-          echo "VERSION_TAG=${{ env.MEMGRAPH_IMAGE }}.$build_num" >> $GITHUB_ENV
+          echo "VERSION_TAG=${{ env.FEDERATION_DCC_REST_API_IMAGE }}.$build_num"
+          echo "VERSION_TAG=${{ env.FEDERATION_DCC_REST_API_IMAGE }}.$build_num" >> $GITHUB_ENV
         fi
       
     
@@ -118,7 +121,7 @@ jobs:
         do
           zip -r $tier.$VERSION_TAG.zip $tier.$VERSION_TAG
 
-          aws s3api put-object --bucket federation-cdk-config --key ${{ env.MEMGRAPH_IMAGE }}/$tier.$VERSION_TAG.zip --body $tier.$VERSION_TAG.zip
+          aws s3api put-object --bucket federation-cdk-config --key ${{ env.FEDERATION_DCC_REST_API_IMAGE }}/$tier.$VERSION_TAG.zip --body $tier.$VERSION_TAG.zip
           echo "Archived CDK App to S3: $tier.$VERSION_TAG"
         done
   
