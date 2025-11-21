@@ -268,14 +268,14 @@ class Stack(Stack):
                 subnets=vpc.select_subnets(one_per_az=True, subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS).subnets
             )
         
-        self.ALB = elbv2.ApplicationLoadBalancer(
+        ALB = elbv2.ApplicationLoadBalancer(
             self,
             "alb",
             vpc=vpc,
             internet_facing=config.getboolean("alb", "internet_facing", fallback=True),
             vpc_subnets=subnets
         )
-        self.ALB.add_redirect(
+        ALB.add_redirect(
             source_protocol=elbv2.ApplicationProtocol.HTTP,
             source_port=80,
             target_protocol=elbv2.ApplicationProtocol.HTTPS,
@@ -292,7 +292,7 @@ class Stack(Stack):
         alb_cert = cfm.Certificate.from_certificate_arn(self, "alb-cert",
             certificate_arn=certARN)
         
-        self.listener = self.ALB.add_listener("PublicListener",
+        self.listener = ALB.add_listener("PublicListener",
             certificates=[alb_cert],
             port=443
         )
@@ -306,7 +306,7 @@ class Stack(Stack):
         log_bucket = s3.Bucket.from_bucket_name(self, "AlbAccessLogsBucket", config['main']['alb_log_bucket_name'])
         log_prefix = f"{config['main']['program']}/{config['main']['tier']}/{config['main']['project']}/alb-access-logs"
 
-        self.ALB.log_access_logs(
+        ALB.log_access_logs(
             bucket=log_bucket,
             prefix=log_prefix
         )
@@ -387,8 +387,12 @@ class Stack(Stack):
                 rollback=True
             )
         )
-
-        # Add federation REST API listener to existing NLB instead of creating new NLB
+        # Allow port from ALB to ECS service
+        federationDCCRestApiService.connections.security_groups[0].add_ingress_rule(
+            LBSecurityGroup,
+            ec2.Port.tcp(config.getint('federation_dcc_rest_api', 'port'))
+        )
+        
         federationDCCRestApiListener = ALB.add_listener("FederationDCCRestApiListener", 
             port=config.getint('federation_dcc_rest_api', 'port')
         )
