@@ -17,6 +17,10 @@ on:
         description: 'Docker image for the Memgraph service'
         required: true
         default: '3.2'
+      federation_dcc_rest_api_image:
+        description: 'Docker image for the Federation DCC REST API service'
+        required: true
+        default: 'dev.28'
       cdk_command:
         description: 'Which CDK Command To Run'
         required: true
@@ -67,6 +71,7 @@ jobs:
       env:
         ENV_NAME: ${{ inputs.environment }}
         MEMGRAPH_IMAGE: ${{ inputs.memgraph_image }}
+        FEDERATION_DCC_REST_API_IMAGE: ${{ inputs.federation_dcc_rest_api_image }}
         BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
       run: |
         if [[ "$ENV_NAME" =~ ^(dev|qa|stage|prod)$ ]]; then
@@ -82,6 +87,9 @@ jobs:
 
         MEMGRAPH_IMAGE="${MEMGRAPH_IMAGE:-$IMAGE_MEMGRAPH}"
         echo "MEMGRAPH_IMAGE=$MEMGRAPH_IMAGE" >> $GITHUB_ENV
+
+        FEDERATION_DCC_REST_API_IMAGE="${FEDERATION_DCC_REST_API_IMAGE:-$IMAGE_FEDERATION_DCC_REST_API}"
+        echo "FEDERATION_DCC_REST_API_IMAGE=$FEDERATION_DCC_REST_API_IMAGE" >> $GITHUB_ENV
 
         cd aws_cdk/memgraph/
         aws s3api get-object --bucket federation-cdk-config --key config/config.ini.$ENV_NAME ./config.ini.$ENV_NAME
