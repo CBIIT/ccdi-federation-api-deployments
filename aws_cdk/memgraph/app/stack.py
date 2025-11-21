@@ -320,7 +320,7 @@ class Stack(Stack):
         )
 
         # Add required permissions to execution role
-        federationRestApiTaskDefinition.add_to_execution_role_policy(
+        federationDCCRestApiTaskDefinition.add_to_execution_role_policy(
             iam.PolicyStatement(
                 effect=iam.Effect.ALLOW,
                 actions=[
