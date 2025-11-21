@@ -275,12 +275,12 @@ class Stack(Stack):
             internet_facing=config.getboolean("alb", "internet_facing", fallback=True),
             vpc_subnets=subnets
         )
-        # ALB.add_redirect(
-        #     source_protocol=elbv2.ApplicationProtocol.HTTP,
-        #     source_port=80,
-        #     target_protocol=elbv2.ApplicationProtocol.HTTPS,
-        #     target_port=443
-        # )
+        ALB.add_redirect(
+            source_protocol=elbv2.ApplicationProtocol.HTTP,
+            source_port=80,
+            target_protocol=elbv2.ApplicationProtocol.HTTPS,
+            target_port=443
+        )
 
         client = boto3.client('acm')
         response = client.list_certificates(CertificateStatuses=['ISSUED'])
@@ -292,15 +292,15 @@ class Stack(Stack):
         alb_cert = cfm.Certificate.from_certificate_arn(self, "alb-cert",
             certificate_arn=certARN)
         
-        # self.listener = ALB.add_listener("PublicListener",
-        #     certificates=[alb_cert],
-        #     port=443
-        # )
+        self.listener = ALB.add_listener("PublicListener",
+            certificates=[alb_cert],
+            port=443
+        )
 
-        # self.listener.add_action("ECS-Content-Not-Found",
-        #     action=elbv2.ListenerAction.fixed_response(200,
-        #         message_body="The requested resource is not available")
-        # )
+        self.listener.add_action("ECS-Content-Not-Found",
+            action=elbv2.ListenerAction.fixed_response(200,
+                message_body="The requested resource is not available")
+        )
 
         ### ALB Access log
         log_bucket = s3.Bucket.from_bucket_name(self, "AlbAccessLogsBucket", config['main']['alb_log_bucket_name'])
@@ -393,9 +393,9 @@ class Stack(Stack):
             ec2.Port.tcp(config.getint('federation_dcc_rest_api', 'port'))
         )
 
-        # federationDCCRestApiListener = ALB.add_listener("FederationDCCRestApiListener", 
-        #     port=config.getint('federation_dcc_rest_api', 'port')
-        # )
+        federationDCCRestApiListener = ALB.add_listener("FederationDCCRestApiListener", 
+            port=config.getint('federation_dcc_rest_api', 'port')
+        )
 
         federationDCCRestApiTargetGroup = elbv2.ApplicationTargetGroup(self,
             id="federationDCCRestApiTargetGroup",
@@ -406,10 +406,10 @@ class Stack(Stack):
         )
 
         # add_target_groups expects the target_groups argument as a keyword-only list
-        # federationDCCRestApiListener.add_target_groups(
-        #     "federationDCCRestApiTarget",
-        #     target_groups=[federationDCCRestApiTargetGroup]
-        # )
+        federationDCCRestApiListener.add_target_groups(
+            "federationDCCRestApiTarget",
+            target_groups=[federationDCCRestApiTargetGroup]
+        )
         federationDCCRestApiTargetGroup.add_target(federationDCCRestApiService)
 
         # Add ingress rule to LBSecurityGroup for Federation REST API port
