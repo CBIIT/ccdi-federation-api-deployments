@@ -392,12 +392,12 @@ class Stack(Stack):
             LBSecurityGroup,
             ec2.Port.tcp(config.getint('federation_dcc_rest_api', 'port'))
         )
-        
+
         federationDCCRestApiListener = ALB.add_listener("FederationDCCRestApiListener", 
             port=config.getint('federation_dcc_rest_api', 'port')
         )
 
-        federationDCCRestApiTargetGroup = elbv2.NetworkTargetGroup(self,
+        federationDCCRestApiTargetGroup = elbv2.ApplicationTargetGroup(self,
             id="federationDCCRestApiTargetGroup",
             target_type=elbv2.TargetType.IP,
             protocol=elbv2.Protocol.TCP,
