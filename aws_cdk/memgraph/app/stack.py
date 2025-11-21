@@ -21,7 +21,7 @@ class Stack(Stack):
         config = ConfigParser()
         config.read('config.ini')
 
-        self.namingPrefix = "{}-{}".format(config['main']['resource_prefix'], config['main']['tier'])
+        namingPrefix = "{}-{}".format(config['main']['resource_prefix'], config['main']['tier'])
         
         if config.has_option('main', 'subdomain'):
             self.app_url = "https://{}.{}".format(config['main']['subdomain'], config['main']['domain'])
