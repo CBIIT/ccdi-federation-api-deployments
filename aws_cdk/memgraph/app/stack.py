@@ -265,7 +265,7 @@ class Stack(Stack):
         self.ALB = elbv2.ApplicationLoadBalancer(
             self,
             "alb",
-            vpc=self.vpc,
+            vpc=vpc,
             internet_facing=config.getboolean("alb", "internet_facing", fallback=True),
             vpc_subnets=subnets
         )
