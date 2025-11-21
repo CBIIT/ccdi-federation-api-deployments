@@ -272,6 +272,7 @@ class Stack(Stack):
             self,
             "alb",
             vpc=vpc,
+            load_balancer_name=namingPrefix+"-alb",
             internet_facing=config.getboolean("alb", "internet_facing", fallback=True),
             vpc_subnets=subnets
         )
