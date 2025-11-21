@@ -400,7 +400,7 @@ class Stack(Stack):
         federationDCCRestApiTargetGroup = elbv2.ApplicationTargetGroup(self,
             id="federationDCCRestApiTargetGroup",
             target_type=elbv2.TargetType.IP,
-            protocol=elbv2.Protocol.TCP,
+            protocol=elbv2.ApplicationProtocol.HTTP,
             port=config.getint('federation_dcc_rest_api', 'port'),
             vpc=vpc
         )
