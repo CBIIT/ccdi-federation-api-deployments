@@ -297,9 +297,18 @@ class Stack(Stack):
             port=443
         )
 
-        self.listener.add_action("ECS-Content-Not-Found",
-            action=elbv2.ListenerAction.fixed_response(200,
-                message_body="The requested resource is not available")
+        TargetGroup = elbv2.ApplicationTargetGroup(self,
+            id="federationDCCRestApiTargetGroup443",
+            target_type=elbv2.TargetType.IP,
+            protocol=elbv2.ApplicationProtocol.HTTP,
+            port=config.getint('federation_dcc_rest_api', 'port'),
+            vpc=vpc
+        )
+
+        # add_target_groups expects the target_groups argument as a keyword-only list
+        listener.add_target_groups(
+            "federationDCCRestApiTarget443",
+            target_groups=[TargetGroup]
         )
 
         ### ALB Access log
@@ -412,6 +421,8 @@ class Stack(Stack):
         )
         federationDCCRestApiTargetGroup.add_target(federationDCCRestApiService)
 
+        TargetGroup.add_target(federationDCCRestApiService)
+        
         # Add ingress rule to LBSecurityGroup for Federation REST API port
         LBSecurityGroup.add_ingress_rule(
             peer=ec2.Peer.any_ipv4(),
