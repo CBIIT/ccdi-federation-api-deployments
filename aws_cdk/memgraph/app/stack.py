@@ -306,7 +306,7 @@ class Stack(Stack):
         )
 
         # add_target_groups expects the target_groups argument as a keyword-only list
-        listener.add_target_groups(
+        self.listener.add_target_groups(
             "federationDCCRestApiTarget443",
             target_groups=[TargetGroup]
         )
