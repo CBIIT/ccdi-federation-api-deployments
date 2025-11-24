@@ -360,7 +360,7 @@ class Stack(Stack):
             memory_limit_mib=config.getint('federation_dcc_rest_api', 'memory'),
             port_mappings=[ecs.PortMapping(container_port=config.getint('federation_dcc_rest_api', 'port'))],
             environment={
-                "memgraph_uri": "bolt://" + ALB.load_balancer_dns_name + ":7687",
+                "memgraph_uri": "bolt://" + NLB.load_balancer_dns_name + ":7687",
                 "memgraph_database": "memgraph"
             },
             secrets={
