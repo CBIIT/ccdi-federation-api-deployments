@@ -9,9 +9,9 @@ services:
     image: 2.2.0.139
     buildNumber: '139'
   api:
-    version: rc-v1.2.3-security.105
-    image: rc-v1.2.3-security.105
-    buildNumber: '105'
+    version: rc-v1.2.3-security.106
+    image: rc-v1.2.3-security.106
+    buildNumber: '106'
   dcc:
     version: cz_test.12
     image: cz_test.12
