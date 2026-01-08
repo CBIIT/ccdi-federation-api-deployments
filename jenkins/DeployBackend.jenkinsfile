@@ -52,8 +52,8 @@ pipeline {
   		steps {
 
   		checkout([$class: 'GitSCM',
-			branches: [[name: '*/main']],
-			// branches: [[name: '*/deploy_test']],
+			// branches: [[name: '*/main']],
+			branches: [[name: '*/backend_deploy']],
 			extensions: [[$class: 'SubmoduleOption', 
 			recursiveSubmodules: true],
 			[$class: 'RelativeTargetDirectory',
@@ -130,7 +130,15 @@ pipeline {
 
 			script {
 
-			    sh label: 'Task-Definition-Update', script: '''#!/bin/bash
+			    //sh label: 'Task-Definition-Update', script: '''#!/bin/bash
+
+				sh label: 'Task-Definition-Update', script: '''
+
+				#!/usr/bin/env bash
+				set -Eeuo pipefail
+
+				trap 'rc=$?; echo "ERROR: exit=$rc line=$LINENO cmd=$BASH_COMMAND" >&2' ERR
+				set -x
 
 				# create new revision for $PROJECT-$APP Task Definition
 				echo "Updating Task Defintion to Use: $ECR_REPO:$IMAGE_TAG"
