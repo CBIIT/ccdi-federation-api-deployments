@@ -1,4 +1,4 @@
-//@Library('datacommons-jenkins-shared-library@v1.1') _
+@Library('datacommons-jenkins-shared-library@v1.1') _
 
 pipeline {
 	agent {
@@ -126,14 +126,6 @@ pipeline {
 
   	stage('Update Task Definition'){
 
-        agent {
-                docker {
-                    image 'cbiitssrepo/cicd-ansible_4.0'
-                    args '--net=host -u root -v /var/run/docker.sock:/var/run/docker.sock'
-                    reuseNode true
-                }
-            }
-
         steps {
 
 			script {
@@ -172,7 +164,7 @@ pipeline {
 				cat $TEMPLATE_PATH/${APP}_task-deploy.yml
 
 				#aws ecs register-task-definition --cli-input-yaml file://$TEMPLATE_FILE
-                aws ecs register-task-definition --cli-input-yaml file://$TEMPLATE_PATH/${APP}_task-deploy.yml
+                #aws ecs register-task-definition --cli-input-yaml file://$TEMPLATE_PATH/${APP}_task-deploy.yml
 
 				#docker run -v ./$TEMPLATE_PATH:/aws/ --rm --name aws-cli amazon/aws-cli ecs register-task-definition --cli-input-yaml file:///aws/${APP}_task-deploy.yml
 
@@ -187,13 +179,31 @@ pipeline {
 
     stage('Update Service'){
 
+        agent {
+                docker {
+                    image 'cbiitssrepo/cicd-ansible_4.0'
+                    args '--net=host -u root -v /var/run/docker.sock:/var/run/docker.sock'
+                    reuseNode true
+                }
+            }
+
  		steps {
 
  			script {
 
 			    sh label: 'Service-Update', script: '''#!/bin/bash
 
-				# Redeploy Service Using The Latest Task Definition
+				# Register task definition
+
+				# DEBUG
+				TEMPLATE_PATH="ccdi-federation-api-deployments/aws"
+                echo "$TEMPLATE_PATH"
+				cat $TEMPLATE_PATH/${APP}_task-deploy.yml
+
+				#aws ecs register-task-definition --cli-input-yaml file://$TEMPLATE_FILE
+                aws ecs register-task-definition --cli-input-yaml file://$TEMPLATE_PATH/${APP}_task-deploy.yml
+
+                # Redeploy Service Using The Latest Task Definition
 				echo "Updating Service: $SERVICE"
 
 				TASK_REVISION=$(aws ecs describe-task-definition --task-definition $SERVICE | egrep "revision" | awk '{print $2}' | sed 's/,//')
