@@ -52,8 +52,7 @@ pipeline {
   		steps {
 
   		checkout([$class: 'GitSCM',
-			// branches: [[name: '*/main']],
-			branches: [[name: '*/backend_deploy']],
+			branches: [[name: '*/main']],
 			extensions: [[$class: 'SubmoduleOption', 
 			recursiveSubmodules: true],
 			[$class: 'RelativeTargetDirectory',
@@ -238,7 +237,7 @@ pipeline {
 
   }
 
-  //post {
+  post {
 
     // always {
 
@@ -249,12 +248,12 @@ pipeline {
 
     // }
 
-    //cleanup {
+    cleanup {
 
-        //cleanWs()
+        cleanWs()
 
-    //}
+    }
 
-  //}
+  }
 
 }
