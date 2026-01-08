@@ -53,7 +53,6 @@ pipeline {
 
   		checkout([$class: 'GitSCM',
 			branches: [[name: '*/main']],
-			// branches: [[name: '*/deploy_test']],
 			extensions: [[$class: 'SubmoduleOption', 
 			recursiveSubmodules: true],
 			[$class: 'RelativeTargetDirectory',
@@ -126,11 +125,19 @@ pipeline {
 
   	stage('Update Task Definition'){
 
- 		steps {
+        steps {
 
 			script {
 
-			    sh label: 'Task-Definition-Update', script: '''#!/bin/bash
+			    //sh label: 'Task-Definition-Update', script: '''#!/bin/bash
+
+				sh label: 'Task-Definition-Update', script: '''
+
+				#!/usr/bin/env bash
+				set -Eeuo pipefail
+
+				trap 'rc=$?; echo "ERROR: exit=$rc line=$LINENO cmd=$BASH_COMMAND" >&2' ERR
+				set -x
 
 				# create new revision for $PROJECT-$APP Task Definition
 				echo "Updating Task Defintion to Use: $ECR_REPO:$IMAGE_TAG"
@@ -156,8 +163,9 @@ pipeline {
 				cat $TEMPLATE_PATH/${APP}_task-deploy.yml
 
 				#aws ecs register-task-definition --cli-input-yaml file://$TEMPLATE_FILE
+                #aws ecs register-task-definition --cli-input-yaml file://$TEMPLATE_PATH/${APP}_task-deploy.yml
 
-				docker run -v ./$TEMPLATE_PATH:/aws/ --rm --name aws-cli amazon/aws-cli ecs register-task-definition --cli-input-yaml file:///aws/${APP}_task-deploy.yml
+				#docker run -v ./$TEMPLATE_PATH:/aws/ --rm --name aws-cli amazon/aws-cli ecs register-task-definition --cli-input-yaml file:///aws/${APP}_task-deploy.yml
 
 				'''
 
@@ -170,13 +178,31 @@ pipeline {
 
     stage('Update Service'){
 
+        agent {
+                docker {
+                    image 'cbiitssrepo/cicd-ansible_4.0'
+                    args '--net=host -u root -v /var/run/docker.sock:/var/run/docker.sock'
+                    reuseNode true
+                }
+            }
+
  		steps {
 
  			script {
 
 			    sh label: 'Service-Update', script: '''#!/bin/bash
 
-				# Redeploy Service Using The Latest Task Definition
+				# Register task definition
+
+				# DEBUG
+				TEMPLATE_PATH="ccdi-federation-api-deployments/aws"
+                echo "$TEMPLATE_PATH"
+				cat $TEMPLATE_PATH/${APP}_task-deploy.yml
+
+				#aws ecs register-task-definition --cli-input-yaml file://$TEMPLATE_FILE
+                aws ecs register-task-definition --cli-input-yaml file://$TEMPLATE_PATH/${APP}_task-deploy.yml
+
+                # Redeploy Service Using The Latest Task Definition
 				echo "Updating Service: $SERVICE"
 
 				TASK_REVISION=$(aws ecs describe-task-definition --task-definition $SERVICE | egrep "revision" | awk '{print $2}' | sed 's/,//')
