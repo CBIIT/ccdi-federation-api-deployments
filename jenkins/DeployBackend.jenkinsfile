@@ -126,7 +126,15 @@ pipeline {
 
   	stage('Update Task Definition'){
 
- 		steps {
+        agent {
+                docker {
+                    image 'cbiitssrepo/cicd-ansible_4.0'
+                    args '--net=host -u root -v /var/run/docker.sock:/var/run/docker.sock'
+                    reuseNode true
+                }
+            }
+
+        steps {
 
 			script {
 
@@ -164,8 +172,9 @@ pipeline {
 				cat $TEMPLATE_PATH/${APP}_task-deploy.yml
 
 				#aws ecs register-task-definition --cli-input-yaml file://$TEMPLATE_FILE
+                aws ecs register-task-definition --cli-input-yaml file://$TEMPLATE_PATH/${APP}_task-deploy.yml
 
-				docker run -v ./$TEMPLATE_PATH:/aws/ --rm --name aws-cli amazon/aws-cli ecs register-task-definition --cli-input-yaml file:///aws/${APP}_task-deploy.yml
+				#docker run -v ./$TEMPLATE_PATH:/aws/ --rm --name aws-cli amazon/aws-cli ecs register-task-definition --cli-input-yaml file:///aws/${APP}_task-deploy.yml
 
 				'''
 
