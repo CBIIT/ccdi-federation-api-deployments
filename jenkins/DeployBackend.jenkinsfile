@@ -84,6 +84,7 @@ pipeline {
 				// set repo URL
 				env.REPO_URL = "${ECR_ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO}"
                 env.FEDERATION_APIS = sh(label: 'Get federation_apis', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.federation_apis'").trim()
+				env.FEDERATION_DOMAIN_NAMESPACE = sh(label: 'Get federation_domain_namespace', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.federation_domain_namespace'").trim()
 				env.FEDERATION_SOURCES = sh(label: 'Get federation_sources', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id ccdi-$ENV-federation-secrets --query SecretString --output text | jq -r '.federation_sources'").trim()
 				env.CPI_CLIENT_ID = sh(label: 'Get cpi client id', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id cpi --query SecretString --output text | jq -r '.cpi_client_id'").trim()
 				env.CPI_CLIENT_SECRET = sh(label: 'Get cpi client secret', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id cpi --query SecretString --output text | jq -r '.cpi_client_secret'").trim()
