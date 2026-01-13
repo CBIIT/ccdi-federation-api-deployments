@@ -72,7 +72,7 @@ containerDefinitions:
     value: "$FEDERATION_APIS"
   - name: "federation_domain_namespace"
     value: "$FEDERATION_DOMAIN_NAMESPACE"
-  - name: "federation_sources"
+  - name: "federation_domain_namespace"
     value: "$FEDERATION_SOURCES"
   - name: "cpi_client_id"
     value: "$CPI_CLIENT_ID"  
