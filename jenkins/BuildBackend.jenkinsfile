@@ -112,6 +112,10 @@ pipeline {
 				#repo_url="$aws_account.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO"
 				repo_url="$ECR_ACCT.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO"
 
+				# Clear BuildKit cache and pull fresh dockerfile frontend
+				docker builder prune -a -f || true
+				docker pull --platform=linux/amd64 docker/dockerfile:1 || true
+
 				cd $WORKSPACE/$CODE_FOLDER && DOCKER_BUILDKIT=1 docker build --platform=linux/amd64 --no-cache -t $repo_url:$CODE_BRANCH.$BUILD_NUMBER .
 
 				'''
