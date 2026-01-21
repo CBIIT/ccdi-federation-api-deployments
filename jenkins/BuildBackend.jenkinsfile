@@ -112,11 +112,11 @@ pipeline {
 				#repo_url="$aws_account.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO"
 				repo_url="$ECR_ACCT.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO"
 
-				# Clear BuildKit cache and pull fresh dockerfile frontend
-				docker builder prune -a -f || true
-				docker pull --platform=linux/amd64 docker/dockerfile:1 || true
+				# Remove syntax directive to avoid frontend container crash on ARM build agents
+				cd $WORKSPACE/$CODE_FOLDER
+				sed -i '/^# syntax=/d' Dockerfile
 
-				cd $WORKSPACE/$CODE_FOLDER && DOCKER_BUILDKIT=1 docker build --platform=linux/amd64 --no-cache -t $repo_url:$CODE_BRANCH.$BUILD_NUMBER .
+				DOCKER_BUILDKIT=1 docker build --platform=linux/amd64 --no-cache -t $repo_url:$CODE_BRANCH.$BUILD_NUMBER .
 
 				'''
 
