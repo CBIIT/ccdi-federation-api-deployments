@@ -112,7 +112,7 @@ pipeline {
 				#repo_url="$aws_account.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO"
 				repo_url="$ECR_ACCT.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO"
 
-				cd $WORKSPACE/$CODE_FOLDER && DOCKER_BUILDKIT=1 docker build --no-cache -t $repo_url:$CODE_BRANCH.$BUILD_NUMBER .
+				cd $WORKSPACE/$CODE_FOLDER && DOCKER_BUILDKIT=1 docker build --platform=linux/amd64 --no-cache -t $repo_url:$CODE_BRANCH.$BUILD_NUMBER .
 
 				'''
 
