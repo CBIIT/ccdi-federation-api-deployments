@@ -9,9 +9,9 @@ services:
     image: 2.2.0.139
     buildNumber: '139'
   api:
-    version: v1.2.4.129
-    image: v1.2.4.129
-    buildNumber: '129'
+    version: rc-v1.2.5-timeout.130
+    image: rc-v1.2.5-timeout.130
+    buildNumber: '130'
   dcc:
     version: cz_test.12
     image: cz_test.12
