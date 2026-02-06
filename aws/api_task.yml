@@ -81,7 +81,9 @@ containerDefinitions:
   - name: "cpi_token_url"
     value: "$CPI_TOKEN_URL"   
   - name: "cpi_url"
-    value: "$CPI_URL"           
+    value: "$CPI_URL"
+  - name: "federation_request_timeout"
+    value: "120"    
   logConfiguration:
     logDriver: awsfirelens
     options:
