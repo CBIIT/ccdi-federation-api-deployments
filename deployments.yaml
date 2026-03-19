@@ -9,9 +9,9 @@ services:
     image: 2.2.0.139
     buildNumber: '139'
   api:
-    version: FEDERATION-529.134
-    image: FEDERATION-529.134
-    buildNumber: '134'
+    version: FEDERATION-529.135
+    image: FEDERATION-529.135
+    buildNumber: '135'
   dcc:
     version: cz_test.12
     image: cz_test.12
